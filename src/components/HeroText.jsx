@@ -1,98 +1,59 @@
 import { FlipWords } from "./FlipWords";
-import { motion } from "motion/react";
 
 const HeroText = () => {
   const words = ["Secure", "Modern", "Scalable"];
-  const variants = {
-    hidden: { opacity: 0, x: -50 },
-    visible: { opacity: 1, x: 0 },
-  };
   return (
-    <div className="z-10 mt-20 text-center md:mt-40 md:text-left rounded-3xl bg-clip-text">
+    <div className="z-10 mt-28 text-center md:mt-32 md:text-left">
       {/* Desktop View */}
-      <div className="flex-col hidden md:flex c-space">
-        <motion.h1
-          className="text-4xl font-medium"
-          variants={variants}
-          initial="hidden"
-          animate="visible"
-          transition={{ delay: 1 }}
-        >
-          Hi I'm Ali
-        </motion.h1>
+      <div className="flex-col hidden md:flex c-space hero-panel">
+        <h1 className="hero-kicker text-5xl font-medium lg:text-6xl js-hero-item">
+          Hi I'm Yassine ESSABIR
+        </h1>
         <div className="flex flex-col items-start">
-          <motion.p
-            className="text-5xl font-medium text-neutral-300"
-            variants={variants}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 1.2 }}
-          >
+          <p className="hero-line text-6xl font-medium lg:text-7xl leading-tight js-hero-item">
             A Developer <br /> Dedicated to Crafting
-          </motion.p>
-          <motion.div
-            variants={variants}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 1.5 }}
-          >
+          </p>
+          <div className="js-hero-item">
             <FlipWords
               words={words}
-              className="font-black text-white text-8xl"
+              className="hero-word font-black text-white text-8xl lg:text-9xl"
             />
-          </motion.div>
-          <motion.p
-            className="text-4xl font-medium text-neutral-300"
-            variants={variants}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 1.8 }}
-          >
+          </div>
+          <p className="hero-subline text-5xl font-medium lg:text-6xl js-hero-item">
             Web Solutions
-          </motion.p>
+          </p>
+          <a
+            href="#contact"
+            className="btn-neon hover-animation mt-8 self-start js-hero-item"
+          >
+            Start a Project
+          </a>
         </div>
       </div>
       {/* Mobile View */}
-      <div className="flex- flex-col space-y-6 md:hidden">
-        <motion.p
-          className="text-4xl font-medium"
-          variants={variants}
-          initial="hidden"
-          animate="visible"
-          transition={{ delay: 1 }}
-        >
+      <div className="flex flex-col space-y-6 md:hidden c-space">
+        <p className="hero-kicker text-5xl font-medium sm:text-6xl js-hero-item">
           Hi,I'm Ali
-        </motion.p>
+        </p>
         <div>
-          <motion.p
-            className="text-5xl font-black text-neutral-300"
-            variants={variants}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 1.2 }}
-          >
+          <p className="hero-line text-6xl font-black sm:text-7xl leading-tight js-hero-item">
             Building
-          </motion.p>
-          <motion.div
-            variants={variants}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 1.5 }}
-          >
+          </p>
+          <div className="js-hero-item">
             <FlipWords
               words={words}
-              className="font-bold text-white text-7xl"
+              className="hero-word font-bold text-white text-8xl"
             />
-          </motion.div>
-          <motion.p
-            className="text-4xl font-black text-neutral300"
-            variants={variants}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 1.8 }}
-          >
+          </div>
+          <p className="hero-subline text-5xl font-black sm:text-6xl js-hero-item">
             Web Applications
-          </motion.p>
+          </p>
+          <a
+            href="#contact"
+            className="btn-neon hover-animation mt-6 mx-auto js-hero-item"
+          >
+            Start a Project
+          </a>
         </div>
       </div>
     </div>

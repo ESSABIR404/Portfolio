@@ -7,6 +7,31 @@
     <title>Vite + React</title>
   </head>
   <body>
+    <svg
+      id="loader-overlay"
+      class="shape-overlays"
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      aria-hidden="false"
+    >
+      <defs>
+        <linearGradient id="gradient1" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#5c33cc" />
+          <stop offset="55%" stop-color="#7a57db" />
+          <stop offset="100%" stop-color="#ca2f8c" />
+        </linearGradient>
+        <linearGradient id="gradient2" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#161a31" />
+          <stop offset="55%" stop-color="#33c2cc" />
+          <stop offset="100%" stop-color="#ea4884" />
+        </linearGradient>
+      </defs>
+      <path class="shape-overlays__path" fill="url(#gradient2)"></path>
+      <path class="shape-overlays__path" fill="url(#gradient1)"></path>
+    </svg>
+    <div id="loader-title" class="loader-title" aria-hidden="false">
+      <span class="loader-title__text">YASSINE ESSABIR</span>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
