@@ -1,116 +1,449 @@
-import { useRef } from "react";
-import Card from "../components/Card";
-import { Globe } from "../components/globe";
-import CopyEmailButton from "../components/CopyEmailButton";
-import { Frameworks } from "../components/FrameWorks";
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import TechMarquee from "../components/TechMarquee";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
-  const grid2Container = useRef();
+  const mobileSliderRef = useRef(null);
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const track = mobileSliderRef.current;
+    if (!track) return;
+
+    const prefersReduced =
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) return;
+
+    let tween;
+
+    const setup = () => {
+      if (tween) tween.kill();
+      const slides = Array.from(track.querySelectorAll("img"));
+      const sets = Number(track.dataset.sets || 2);
+      const setSize = Math.floor(slides.length / sets);
+      if (!setSize) return;
+      const gap = parseFloat(getComputedStyle(track).gap || "0");
+      const setWidth =
+        slides
+          .slice(0, setSize)
+          .reduce((sum, slide) => sum + slide.getBoundingClientRect().width, 0) +
+        gap * Math.max(0, setSize - 1);
+
+      if (!setWidth) return;
+
+      const wrapX = gsap.utils.wrap(-setWidth, 0);
+
+      gsap.set(track, { x: 0 });
+      tween = gsap.to(track, {
+        x: -setWidth,
+        duration: 18,
+        ease: "none",
+        repeat: -1,
+        modifiers: {
+          x: (value) => `${wrapX(parseFloat(value))}px`,
+        },
+      });
+    };
+
+    setup();
+    window.addEventListener("resize", setup);
+    window.addEventListener("load", setup);
+
+    return () => {
+      window.removeEventListener("resize", setup);
+      window.removeEventListener("load", setup);
+      if (tween) tween.kill();
+    };
+  }, []);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const prefersReduced =
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) return;
+
+    const ctx = gsap.context(() => {
+      const header = gsap.utils.toArray(
+        ".services-title, .services-cta",
+        section
+      );
+      const cards = gsap.utils.toArray(".service-card", section);
+      const marquee = section.querySelector(".logo-marquee");
+      const media = gsap.utils.toArray(
+        ".service-card__media, .service-card__media-slider",
+        section
+      );
+
+      gsap.set(header, { autoAlpha: 0, y: 24, filter: "blur(6px)" });
+      gsap.set(cards, {
+        autoAlpha: 0,
+        y: 48,
+        filter: "blur(8px)",
+        scale: 0.98,
+        transformPerspective: 1200,
+      });
+      if (marquee) {
+        gsap.set(marquee, { autoAlpha: 0, y: 32, filter: "blur(8px)" });
+      }
+
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: "top 85%",
+          end: "bottom 20%",
+        },
+      })
+        .to(header, {
+          autoAlpha: 1,
+          y: 0,
+          filter: "blur(0px)",
+          duration: 0.8,
+          ease: "power2.out",
+          stagger: 0.1,
+          overwrite: true,
+        })
+        .to(
+          header,
+          {
+            y: 0,
+          },
+          0
+        );
+
+      const getCardOffsetX = (card) =>
+        card.closest(".services-column--alt") ? 36 : -36;
+
+      const revealCards = (batch, direction) => {
+        const fromY = direction === "down" ? -44 : 44;
+        batch.forEach((card, index) => {
+          gsap.fromTo(
+            card,
+            {
+              autoAlpha: 0,
+              y: fromY,
+              x: getCardOffsetX(card),
+              rotateX: direction === "down" ? -6 : 6,
+              scale: 0.98,
+              filter: "blur(8px)",
+            },
+            {
+              autoAlpha: 1,
+              y: 0,
+              x: 0,
+              rotateX: 0,
+              scale: 1,
+              filter: "blur(0px)",
+              duration: 1.0,
+              ease: "power2.out",
+              delay: index * 0.08,
+              overwrite: true,
+            }
+          );
+        });
+      };
+
+      ScrollTrigger.batch(cards, {
+        start: "top 85%",
+        end: "bottom 20%",
+        onEnter: (batch) => revealCards(batch, "up"),
+        onEnterBack: (batch) => revealCards(batch, "down"),
+      });
+
+      if (marquee) {
+        ScrollTrigger.create({
+          trigger: marquee,
+          start: "top 90%",
+          onEnter: () =>
+            gsap.to(marquee, {
+              autoAlpha: 1,
+              y: 0,
+              filter: "blur(0px)",
+              duration: 0.9,
+              ease: "power2.out",
+              overwrite: true,
+            }),
+          onEnterBack: () =>
+            gsap.fromTo(
+              marquee,
+              { autoAlpha: 0, y: -28, filter: "blur(6px)" },
+              {
+                autoAlpha: 1,
+                y: 0,
+                filter: "blur(0px)",
+                duration: 0.9,
+                ease: "power2.out",
+                overwrite: true,
+              }
+            ),
+        });
+      }
+
+      media.forEach((item) => {
+        gsap.fromTo(
+          item,
+          { yPercent: 6 },
+          {
+            yPercent: -6,
+            ease: "none",
+            scrollTrigger: {
+              trigger: item,
+              start: "top 90%",
+              end: "bottom 10%",
+              scrub: 0.6,
+            },
+          }
+        );
+      });
+    }, section);
+
+    return () => ctx.revert();
+  }, []);
   return (
-    <section className="c-space section-spacing" id="about">
-      <h2 className="text-heading">About Me</h2>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-6 md:auto-rows-[18rem] mt-12">
-        {/* Grid 1 */}
-        <div className="flex items-end grid-default-color grid-1">
-          <img
-            src="assets/coding-pov.png"
-            className="absolute scale-[1.75] -right-[5rem] -top-[1rem] md:scale-[3] md:left-50 md:inset-y-10 lg:scale-[2.5]"
-          />
-          <div className="z-10">
-            <p className="headtext">Hi, I'm Ali Sanati</p>
-            <p className="subtext">
-              Over the last 4 years, I developed my frontend and backend dev
-              skills to deliver dynamic and software and web applications.
+    <section
+      className="c-space section-spacing services-section"
+      id="about"
+      ref={sectionRef}
+    >
+      <div className="services-header">
+        <h2 className="services-title">How I Can Help Your Business</h2>
+        <a
+          className="services-cta button1"
+          href="#contact"
+          style={{ "--clr": "#7808d0" }}
+        >
+          Get in Touch
+          <span className="button1__icon-wrapper" aria-hidden="true">
+            <svg
+              viewBox="0 0 14 15"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="button1__icon-svg"
+              width="10"
+            >
+              <path
+                d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z"
+                fill="currentColor"
+              ></path>
+            </svg>
+
+            <svg
+              viewBox="0 0 14 15"
+              fill="none"
+              width="10"
+              xmlns="http://www.w3.org/2000/svg"
+              className="button1__icon-svg button1__icon-svg--copy"
+            >
+              <path
+                d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z"
+                fill="currentColor"
+              ></path>
+            </svg>
+          </span>
+        </a>
+      </div>
+
+      <div className="services-grid">
+        <div className="services-column">
+          <article className="service-card service-card--xl">
+            <div className="service-card__head">
+              <span className="service-card__icon">
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  width="20"
+                  height="20"
+                  fill="none"
+                >
+                  <rect
+                    x="3"
+                    y="4"
+                    width="18"
+                    height="14"
+                    rx="2"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  />
+                  <path
+                    d="M3 9H21"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  />
+                </svg>
+              </span>
+              <h3 className="service-card__title">
+                Website Design & Development
+              </h3>
+            </div>
+            <p className="service-card__text">
+              Get a unique website built with strong performance, polished UI,
+              and SEO-ready foundations. I blend design and engineering to
+              create fast, conversion-focused experiences.
             </p>
-          </div>
-          <div className="absolute inset-x-0 pointer-evets-none -bottom-4 h-1/2 sm:h-1/3 bg-gradient-to-t from-indigo" />
+            <div className="service-card__media">
+              <img
+                src="assets/projects/wordpress-theme.jpg"
+                alt="Website preview"
+                loading="lazy"
+              />
+            </div>
+          </article>
+
+          <article className="service-card service-card--compact">
+            <div className="service-card__head">
+              <span className="service-card__icon">
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  width="20"
+                  height="20"
+                  fill="none"
+                >
+                  <path
+                    d="M4 6.5h16M8 11.5h8M6.5 16.5H13"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </span>
+              <h3 className="service-card__title">Strategic Consultations</h3>
+            </div>
+            <p className="service-card__text">
+              Need clarity on your next move? I provide actionable roadmaps,
+              audits, and product strategy tailored to your goals and timeline.
+            </p>
+          </article>
         </div>
-        {/* Grid 2 */}
-        <div className="grid-default-color grid-2">
-          <div
-            ref={grid2Container}
-            className="flex items-center justify-center w-full h-full"
-          >
-            <p className="flex items-end text-5xl text-gray-500">
-              CODE IS CRAFT
+
+        <div className="services-column services-column--alt">
+          <article className="service-card service-card--compact">
+            <div className="service-card__head">
+              <span className="service-card__icon">
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  width="20"
+                  height="20"
+                  fill="none"
+                >
+                  <rect
+                    x="7"
+                    y="4"
+                    width="10"
+                    height="16"
+                    rx="2"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  />
+                  <path
+                    d="M10 8h4"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </span>
+              <h3 className="service-card__title">UI/UX Design</h3>
+            </div>
+            <p className="service-card__text">
+              I craft intuitive interfaces for web and mobile, optimizing user
+              journeys and elevating your brand with thoughtful, human-centered
+              design.
             </p>
-            <Card
-              style={{ rotate: "75deg", top: "30%", left: "20%" }}
-              text="GRASP"
-              containerRef={grid2Container}
-            />
-            <Card
-              style={{ rotate: "-30deg", top: "60%", left: "45%" }}
-              text="SOLID"
-              containerRef={grid2Container}
-            />
-            <Card
-              style={{ rotate: "90deg", bottom: "30%", left: "70%" }}
-              text="Design Patterns"
-              containerRef={grid2Container}
-            />
-            <Card
-              style={{ rotate: "-45deg", top: "55%", left: "0%" }}
-              text="Design Principles"
-              containerRef={grid2Container}
-            />
-            <Card
-              style={{ rotate: "20deg", top: "10%", left: "38%" }}
-              text="SRP"
-              containerRef={grid2Container}
-            />
-            <Card
-              style={{ rotate: "30deg", top: "70%", left: "70%" }}
-              image="assets/logos/csharp-pink.png"
-              containerRef={grid2Container}
-            />
-            <Card
-              style={{ rotate: "-45deg", top: "70%", left: "25%" }}
-              image="assets/logos/dotnet-pink.png"
-              containerRef={grid2Container}
-            />
-            <Card
-              style={{ rotate: "-45deg", top: "5%", left: "10%" }}
-              image="assets/logos/blazor-pink.png"
-              containerRef={grid2Container}
-            />
-          </div>
-        </div>
-        {/* Grid 3 */}
-        <div className="grid-black-color grid-3">
-          <div className="z-10 w-[50%]">
-            <p className="headtext">Time Zone</p>
-            <p className="subtext">
-              I'm based in Mars, and open to remote work worldwide
+          </article>
+
+          <article className="service-card service-card--media">
+            <div className="service-card__head">
+              <span className="service-card__icon">
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  width="20"
+                  height="20"
+                  fill="none"
+                >
+                  <rect
+                    x="6"
+                    y="3"
+                    width="12"
+                    height="18"
+                    rx="2.5"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  />
+                  <circle
+                    cx="12"
+                    cy="17"
+                    r="0.8"
+                    fill="currentColor"
+                  />
+                </svg>
+              </span>
+              <h3 className="service-card__title">Mobile App Development</h3>
+            </div>
+            <p className="service-card__text">
+              Launch polished mobile experiences with smooth performance,
+              scalable architecture, and delightful UI across iOS and Android.
             </p>
-          </div>
-          <figure className="absolute left-[30%] top-[10%]">
-            <Globe />
-          </figure>
-        </div>
-        {/* Grid 4 */}
-        <div className="grid-special-color grid-4">
-          <div className="flex flex-col items-center justify-center gap-4 size-full">
-            <p className="text-center headtext">
-              Do you want to start a project together?
-            </p>
-            <CopyEmailButton />
-          </div>
-        </div>
-        {/* Grid 5 */}
-        <div className="grid-default-color grid-5">
-          <div className="z-10 w-[50%]">
-            <p className="headText">Teck Stack</p>
-            <p className="subtext">
-              I specialize in a variety of languages, frameworks, and tools taht
-              allow me to build robust and scalable applications
-            </p>
-          </div>
-          <div className="absolute inset-y-0 md:inset-y-9 w-full h-full start-[50%] md:scale-125">
-            <Frameworks />
-          </div>
+            <div className="service-card__media-slider">
+              <div
+                className="service-card__media-track"
+                ref={mobileSliderRef}
+                data-sets="3"
+              >
+                <img
+                  className="service-card__media-slide"
+                  src="assets/projects/elearning.jpg"
+                  alt="Mobile app interface preview"
+                  loading="lazy"
+                />
+                <img
+                  className="service-card__media-slide"
+                  src="assets/projects/image2.png"
+                  alt="Mobile app flow preview"
+                  loading="lazy"
+                />
+                <img
+                  className="service-card__media-slide"
+                  src="assets/projects/elearning.jpg"
+                  alt=""
+                  aria-hidden="true"
+                  loading="lazy"
+                />
+                <img
+                  className="service-card__media-slide"
+                  src="assets/projects/image2.png"
+                  alt=""
+                  aria-hidden="true"
+                  loading="lazy"
+                />
+                <img
+                  className="service-card__media-slide"
+                  src="assets/projects/elearning.jpg"
+                  alt=""
+                  aria-hidden="true"
+                  loading="lazy"
+                />
+                <img
+                  className="service-card__media-slide"
+                  src="assets/projects/image2.png"
+                  alt=""
+                  aria-hidden="true"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          </article>
         </div>
       </div>
+      <TechMarquee />
     </section>
   );
 };

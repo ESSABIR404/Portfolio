@@ -11,11 +11,13 @@ import { useGLTF, useAnimations } from "@react-three/drei";
 import { useMotionValue, useSpring } from "motion/react";
 import { useFrame } from "@react-three/fiber";
 import { closeOverlayLoader } from "../loader";
+import { easing } from "maath";
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models/tenhun_falling_spaceman_fanart.glb`;
 
 export function Astronaut(props) {
   const group = useRef();
+  const baseRotation = useRef([6, -0.6, 0]);
   const { scene, animations } = useGLTF(MODEL_URL);
   const { actions } = useAnimations(animations, group);
   useEffect(() => {
@@ -32,15 +34,26 @@ export function Astronaut(props) {
   useEffect(() => {
     ySpring.set(-1);
   }, [ySpring]);
-  useFrame(() => {
+  useFrame((state, delta) => {
+    if (!group.current) return;
     group.current.position.y = ySpring.get();
+
+    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+    const x = clamp(state.mouse.x, -0.5, 0.5);
+    const y = clamp(state.mouse.y, -0.4, 0.4);
+    const targetRotation = [
+      baseRotation.current[0] + -y * 0.25,
+      baseRotation.current[1] + x * 0.45,
+      baseRotation.current[2],
+    ];
+    easing.dampE(group.current.rotation, targetRotation, 0.35, delta);
   });
   return (
     <group
       ref={group}
       {...props}
       dispose={null}
-      rotation={[6, -0.6, 0]}
+      rotation={baseRotation.current}
       scale={props.scale || 1.6}
       position={props.position || [1.5, -7, 1]}
     >

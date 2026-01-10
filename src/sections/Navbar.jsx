@@ -29,14 +29,15 @@ function Navigation() {
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="fixed inset-x-0 top-0 z-30 w-full py-3 nav-shell js-navbar">
-      <div className="mx-auto c-space max-w-[94rem] nav-inner">
+    <div className="fixed inset-x-0 top-0 z-30 w-full py-3 nav-shell js-navbar c-space">
+      <div className="mx-auto c-space  nav-inner">
         <div className="flex items-center justify-between py-2">
-          <a
-            href="/"
-            className="nav-brand text-lg sm:text-xl"
-          >
-            Yassine ESSABIR
+          <a href="/" className="nav-brand" aria-label="Essabir home">
+            <img
+              src="assets/logos/EssabirLogo.svg"
+              alt="Essabir logo"
+              className="nav-brand__logo"
+            />
           </a>
           <button
             onClick={() => setIsOpen(!isOpen)}

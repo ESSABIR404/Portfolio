@@ -3,7 +3,7 @@ import { FlipWords } from "./FlipWords";
 const HeroText = () => {
   const words = ["Secure", "Modern", "Scalable"];
   return (
-    <div className="z-10 mt-28 text-center md:mt-32 md:text-left">
+    <div className="z-10 mt-28 text-center md:mt-32 md:text-left c-space">
       {/* Desktop View */}
       <div className="flex-col hidden md:flex c-space hero-panel">
         <h1 className="hero-kicker text-5xl font-medium lg:text-6xl js-hero-item">
@@ -24,9 +24,9 @@ const HeroText = () => {
           </p>
           <a
             href="#contact"
-            className="btn-neon hover-animation mt-8 self-start js-hero-item"
+            className="btn-pill btn-pill--titlecase hover-animation mt-8 self-start js-hero-item"
           >
-            Start a Project
+            Start You Project
           </a>
         </div>
       </div>
@@ -50,9 +50,9 @@ const HeroText = () => {
           </p>
           <a
             href="#contact"
-            className="btn-neon hover-animation mt-6 mx-auto js-hero-item"
+            className="btn-pill btn-pill--titlecase hover-animation mt-6 mx-auto js-hero-item"
           >
-            Start a Project
+            Start You Project
           </a>
         </div>
       </div>

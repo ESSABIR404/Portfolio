@@ -1,52 +1,46 @@
-import React, { useState } from "react";
-import ProjectDetails from "./ProjectDetails";
+const Project = ({ title, image, index, titles = [] }) => {
+  const projectIndex = String(index + 1).padStart(2, "0");
+  const listItems = (() => {
+    if (!titles.length) return [];
+    if (titles.length <= 3) return titles.map((name, idx) => ({ name, idx }));
+    const start = Math.max(0, Math.min(titles.length - 3, index - 1));
+    return titles.slice(start, start + 3).map((name, offset) => ({
+      name,
+      idx: start + offset,
+    }));
+  })();
 
-const Project = ({
-  title,
-  description,
-  subDescription,
-  href,
-  image,
-  tags,
-  setPreview,
-}) => {
-  const [isHidden, setIsHidden] = useState(false);
   return (
-    <>
-      <div
-        className="flex-wrap items-center justify-between py-10 space-y-14 sm:flex sm:space-y-0"
-        onMouseEnter={() => setPreview(image)}
-        onMouseLeave={() => setPreview(null)}
-      >
-        <div>
-          <p className="text-2xl">{title}</p>
-          <div className="flex gap-5 mt-2 text-sand">
-            {tags.map((tag) => (
-              <span key={tag.id}>{tag.name}</span>
-            ))}
-          </div>
+    <article className="project-row">
+      <div className="project-info">
+        <span className="project-index" aria-hidden="true">
+          {projectIndex}.
+        </span>
+
+        <ul className="project-list" aria-label="Project list">
+          {listItems.map(({ name, idx }) => (
+            <li
+              key={`${name}-${idx}`}
+              className={`project-list__item${
+                idx === index ? " project-list__item--active" : ""
+              }`}
+            >
+              {name}
+            </li>
+          ))}
+        </ul>
+
+        <div className="project-summary">
+          <h3 className="project-title">{title}</h3>
         </div>
-        <button
-          onClick={() => setIsHidden(true)}
-          className="flex items-center gap-1 cursor-pointer hover-animation"
-        >
-          Read More
-          <img src="assets/arrow-right.svg" className="w-5" />
-        </button>
       </div>
-      <div className="bg-gradient-to-r from-transparent via-neutral-700 to-transparent h-[1px] w-full" />
-      {isHidden && (
-        <ProjectDetails
-          title={title}
-          description={description}
-          subDescription={subDescription}
-          image={image}
-          tags={tags}
-          href={href}
-          closeModal={() => setIsHidden(false)}
-        />
-      )}
-    </>
+
+      <div className="project-card">
+        <div className="project-card__frame">
+          <img src={image} alt={`${title} preview`} loading="lazy" />
+        </div>
+      </div>
+    </article>
   );
 };
 

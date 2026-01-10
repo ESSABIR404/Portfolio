@@ -11,13 +11,10 @@ import Loader from "../components/Loader";
 const Hero = () => {
   const isMobile = useMediaQuery({ maxWidth: 853 });
   return (
-    <section className="flex items-start justify-center min-h-screen overflow-hidden md:items-start md:justify-start c-space  ">
+    <section className="relative flex w-full items-start justify-center min-h-screen overflow-hidden md:items-start md:justify-start c-space">
       <HeroText />
       <ParallaxBackground />
-      <figure
-        className="absolute inset-0"
-        style={{ width: "100vw", height: "100vh"  }}
-      >
+      <figure className="absolute inset-0 h-full w-full">
         <Canvas camera={{ position: [0, 1, 3] }}>
           <Suspense fallback={<Loader />}>
             <Float>
@@ -36,9 +33,12 @@ const Hero = () => {
 
 function Rig() {
   return useFrame((state, delta) => {
+    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+    const x = clamp(state.mouse.x, -0.45, 0.45);
+    const y = clamp(state.mouse.y, -0.35, 0.35);
     easing.damp3(
       state.camera.position,
-      [state.mouse.x / 10, 1 + state.mouse.y / 10, 3],
+      [x * 0.15, 1 + y * 0.15, 3],
       0.5,
       delta
     );
