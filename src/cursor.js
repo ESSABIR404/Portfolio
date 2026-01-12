@@ -82,15 +82,20 @@ export const initCursor = () => {
       });
     };
 
+    const projectSelector =
+      ".latest-work__device, .works-page__card, .work-detail__more-card";
+    const getProjectTarget = (target) =>
+      target && target.closest ? target.closest(projectSelector) : null;
+
     const handleProjectOver = (event) => {
-      if (!event.target.closest(".latest-work__device")) return;
+      if (!getProjectTarget(event.target)) return;
       showProjectCursor();
     };
 
     const handleProjectOut = (event) => {
-      const leftDevice = event.target.closest(".latest-work__device");
-      if (!leftDevice) return;
-      if (event.relatedTarget?.closest(".latest-work__device")) return;
+      const leftTarget = getProjectTarget(event.target);
+      if (!leftTarget) return;
+      if (getProjectTarget(event.relatedTarget) === leftTarget) return;
       hideProjectCursor();
     };
 

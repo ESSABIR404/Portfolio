@@ -2,32 +2,12 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ProjectCard from "../components/ProjectCard";
+import projects from "../data/projects";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const LatestWork = () => {
   const sectionRef = useRef(null);
-
-  const projects = [
-    {
-      id: "arjuna",
-      title: "Arjuna",
-      subtitle: "Personal Portfolio Website for talented design engineer",
-      image: "/assets/projects/imag3.png",
-    },
-    {
-      id: "bima",
-      title: "Bima",
-      subtitle: "Website and branding for AI Automation Company",
-      image: "/assets/projects/image.png",
-    },
-    {
-      id: "mandala",
-      title: "Mandala",
-      subtitle: "Boutique commerce experience for a premium lifestyle brand",
-      image: "/assets/projects/image2.png",
-    },
-  ];
 
   const list = projects.map((project) => project.title);
   const renderMetaList = (keyPrefix) => (
@@ -255,7 +235,7 @@ const LatestWork = () => {
   return (
     <section
       ref={sectionRef}
-      className="latest-work section-spacing c-space"
+      className="latest-work section-spacing px-32 lg:px-48"
       id="latest-work"
     >
       <h2 className="latest-work__heading">Latest work</h2>
@@ -301,7 +281,7 @@ const LatestWork = () => {
 
       <div className="latest-work__cta-row mb-12">
         <div className="item button-parrot" style={{ "--bg-color": "#2c3e50" }}>
-          <button type="button" className="btn-pill latest-work__cta-button">
+          <a href="/works" className="btn-pill latest-work__cta-button">
             More projects
             <div className="parrot" aria-hidden="true"></div>
             <div className="parrot" aria-hidden="true"></div>
@@ -309,7 +289,7 @@ const LatestWork = () => {
             <div className="parrot" aria-hidden="true"></div>
             <div className="parrot" aria-hidden="true"></div>
             <div className="parrot" aria-hidden="true"></div>
-          </button>
+          </a>
         </div>
       </div>
     </section>

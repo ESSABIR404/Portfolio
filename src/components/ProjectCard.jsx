@@ -1,8 +1,13 @@
-const ProjectCard = ({ index, title, subtitle, image, list = [] }) => {
+const ProjectCard = ({ id, index, title, subtitle, image, list = [] }) => {
   const numeral = String(index + 1).padStart(2, "0");
+  const href = `/works/${id}`;
 
   return (
-    <article className="latest-work__item">
+    <a
+      className="latest-work__item"
+      href={href}
+      aria-label={`View ${title} project`}
+    >
       <div className="latest-work__left">
         <span className="latest-work__index" aria-hidden="true">
           {numeral}.
@@ -30,7 +35,7 @@ const ProjectCard = ({ index, title, subtitle, image, list = [] }) => {
           <img src={image} alt={`${title} preview`} loading="lazy" />
         </div>
       </div>
-    </article>
+    </a>
   );
 };
 

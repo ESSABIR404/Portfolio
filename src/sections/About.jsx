@@ -207,7 +207,7 @@ const About = () => {
   }, []);
   return (
     <section
-      className="c-space section-spacing services-section"
+      className="px-32 lg:px-48 section-spacing services-section"
       id="about"
       ref={sectionRef}
     >

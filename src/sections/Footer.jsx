@@ -32,44 +32,77 @@ const Footer = () => {
 
     const ctx = gsap.context(() => {
       const top = footer.querySelector(".site-footer__top");
+      const logo = footer.querySelector(".site-footer__logo");
+      const kickers = gsap.utils.toArray(".site-footer__kicker", footer);
       const lists = gsap.utils.toArray(".site-footer__list a", footer);
       const email = footer.querySelector(".site-footer__email");
       const wordmark = footer.querySelector(".site-footer__wordmark");
+      const copy = footer.querySelector(".site-footer__copy");
       const services = gsap.utils.toArray(".site-footer__services p", footer);
       const meta = footer.querySelector(".site-footer__meta");
 
       gsap.set([top, email], { autoAlpha: 0, y: 24, filter: "blur(6px)" });
       gsap.set(lists, { autoAlpha: 0, y: 12 });
       gsap.set(wordmark, { autoAlpha: 0, y: 36, scale: 0.98 });
+      if (copy) {
+        gsap.set(copy, { autoAlpha: 0, y: 14 });
+      }
       gsap.set(services, { autoAlpha: 0, x: 24 });
       gsap.set(meta, { autoAlpha: 0, y: 12 });
 
-      gsap
-        .timeline({
-          scrollTrigger: {
-            trigger: footer,
-            start: "top 85%",
-            end: "bottom 40%",
-          },
-        })
-        .to(top, {
-          autoAlpha: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 0.7,
-          ease: "power2.out",
-        })
-        .to(
-          lists,
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: footer,
+          start: "top 85%",
+          end: "bottom 40%",
+        },
+      });
+
+      tl.to(top, {
+        autoAlpha: 1,
+        y: 0,
+        filter: "blur(0px)",
+        duration: 0.7,
+        ease: "power2.out",
+      });
+
+      if (logo) {
+        tl.from(
+          logo,
           {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.5,
+            autoAlpha: 0,
+            y: 10,
+            duration: 0.45,
             ease: "power2.out",
-            stagger: 0.04,
+          },
+          "-=0.45"
+        );
+      }
+      if (kickers.length) {
+        tl.from(
+          kickers,
+          {
+            autoAlpha: 0,
+            y: 10,
+            duration: 0.45,
+            ease: "power2.out",
+            stagger: 0.08,
           },
           "-=0.4"
-        )
+        );
+      }
+
+      tl.to(
+        lists,
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.5,
+          ease: "power2.out",
+          stagger: 0.04,
+        },
+        "-=0.4"
+      )
         .to(
           email,
           {
@@ -91,28 +124,41 @@ const Footer = () => {
             ease: "power3.out",
           },
           "-=0.2"
-        )
-        .to(
-          services,
-          {
-            autoAlpha: 1,
-            x: 0,
-            duration: 0.6,
-            ease: "power2.out",
-            stagger: 0.08,
-          },
-          "-=0.4"
-        )
-        .to(
-          meta,
+        );
+
+      if (copy) {
+        tl.to(
+          copy,
           {
             autoAlpha: 1,
             y: 0,
             duration: 0.5,
             ease: "power2.out",
           },
-          "-=0.25"
+          "-=0.35"
         );
+      }
+
+      tl.to(
+        services,
+        {
+          autoAlpha: 1,
+          x: 0,
+          duration: 0.6,
+          ease: "power2.out",
+          stagger: 0.08,
+        },
+        "-=0.4"
+      ).to(
+        meta,
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.5,
+          ease: "power2.out",
+        },
+        "-=0.25"
+      );
     }, footer);
 
     return () => ctx.revert();
@@ -120,14 +166,10 @@ const Footer = () => {
 
   return (
     <footer className="site-footer" ref={footerRef}>
-      <div className="site-footer__inner c-space">
+      <div className="site-footer__inner px-32 lg:px-48">
         <div className="site-footer__top">
           <div className="site-footer__col site-footer__col--links">
-            <img
-              src="assets/logos/EssabirLogo.svg"
-              alt="Essabir logo"
-              className="site-footer__logo"
-            />
+          
             <nav className="site-footer__list">
               {footerLinks.map((link) => (
                 <a key={link.label} href={link.href}>
@@ -167,9 +209,14 @@ const Footer = () => {
 
         <div className="site-footer__bottom">
           <div>
-            <p className="site-footer__wordmark">
-              Essabir<span>.</span>
-            </p>
+            <div className="site-footer__wordmark">
+
+              <img
+              src="/assets/logos/EssabirLogoLinear.svg"
+              alt="Essabir logo"
+              className="site-footer__logo"
+              />
+              </div>
             <p className="site-footer__copy">
               © 2025 Yassine Essabir. All rights reserved.
             </p>

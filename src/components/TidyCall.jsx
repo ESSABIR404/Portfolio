@@ -1,4 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const DEFAULT_TIDYCAL_URL =
   "https://tidycal.com/essabir02yassine/lets-chat-about-your-idea";
@@ -92,22 +96,116 @@ const TidyCallModal = ({
   );
 };
 
-const TidyCall = () => (
-  <section className="c-space section-spacing" id="tidycall">
-    <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-      <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-        Book a Free Call
-      </h2>
-      <p className="mt-3 text-base text-neutral-300">
-        Let&apos;s create something amazing. Pick a time that works for you.
-      </p>
-    </div>
+const TidyCall = () => {
+  const sectionRef = useRef(null);
 
-    <div className="mt-10">
-      <TidyCallEmbed />
-    </div>
-  </section>
-);
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const prefersReduced =
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) return;
+
+    const ctx = gsap.context(() => {
+      const header = section.querySelector(".js-tidycall-header");
+      const title = section.querySelector(".js-tidycall-title");
+      const copy = section.querySelector(".js-tidycall-copy");
+      const embed = section.querySelector(".js-tidycall-embed");
+
+      const fadeTargets = [header, embed].filter(Boolean);
+      const textTargets = [title, copy].filter(Boolean);
+
+      if (fadeTargets.length) {
+        gsap.set(fadeTargets, {
+          autoAlpha: 0,
+          y: 26,
+          filter: "blur(6px)",
+        });
+      }
+      if (textTargets.length) {
+        gsap.set(textTargets, { autoAlpha: 0, y: 18 });
+      }
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: "top 80%",
+          end: "bottom 30%",
+        },
+      });
+
+      if (header) {
+        tl.to(header, {
+          autoAlpha: 1,
+          y: 0,
+          filter: "blur(0px)",
+          duration: 0.7,
+          ease: "power2.out",
+        });
+      }
+      if (title) {
+        tl.to(
+          title,
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.55,
+            ease: "power2.out",
+          },
+          "-=0.45"
+        );
+      }
+      if (copy) {
+        tl.to(
+          copy,
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.55,
+            ease: "power2.out",
+          },
+          "-=0.4"
+        );
+      }
+      if (embed) {
+        tl.to(
+          embed,
+          {
+            autoAlpha: 1,
+            y: 0,
+            filter: "blur(0px)",
+            duration: 0.75,
+            ease: "power3.out",
+          },
+          "-=0.25"
+        );
+      }
+    }, section);
+
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <section
+      ref={sectionRef}
+      className="px-32 lg:px-48 section-spacing"
+      id="tidycall"
+    >
+      <div className="mx-auto flex max-w-4xl flex-col items-center text-center js-tidycall-header">
+        <h2 className="services-title js-tidycall-title">Book a Free Call</h2>
+        <p className="mt-8 text-base text-neutral-300 js-tidycall-copy">
+          Let&apos;s create something amazing. Pick a time that works for you.
+        </p>
+      </div>
+
+      <div className="mt-10 js-tidycall-embed">
+        <TidyCallEmbed />
+      </div>
+    </section>
+  );
+};
 
 export default TidyCall;
 export { TidyCallEmbed, TidyCallModal };

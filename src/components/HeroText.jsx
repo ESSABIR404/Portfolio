@@ -3,9 +3,9 @@ import { FlipWords } from "./FlipWords";
 const HeroText = () => {
   const words = ["Secure", "Modern", "Scalable"];
   return (
-    <div className="z-10 mt-28 text-center md:mt-32 md:text-left c-space">
+    <div className="z-10 mt-28 text-center md:mt-32 md:text-left px-32 lg:px-48">
       {/* Desktop View */}
-      <div className="flex-col hidden md:flex c-space hero-panel">
+      <div className="flex-col hidden md:flex  hero-panel">
         <h1 className="hero-kicker text-5xl font-medium lg:text-6xl js-hero-item">
           Hi I'm Yassine ESSABIR
         </h1>

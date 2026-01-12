@@ -4,22 +4,22 @@ function Navigation() {
   return (
     <ul className="nav-ul">
       <li className="nav-li">
-        <a className="nav-link js-nav-item" href="#home">
+        <a className="nav-link js-nav-item" href="/#home">
           Home
         </a>
       </li>
       <li className="nav-li">
-        <a className="nav-link js-nav-item" href="#about">
+        <a className="nav-link js-nav-item" href="/#about">
           About
         </a>
       </li>
       <li className="nav-li">
-        <a className="nav-link js-nav-item" href="#work">
+        <a className="nav-link js-nav-item" href="/works">
           Work
         </a>
       </li>
       <li className="nav-li">
-        <a className="nav-link js-nav-item" href="#contact">
+        <a className="nav-link js-nav-item" href="/#tidycall">
           Contact
         </a>
       </li>
@@ -29,12 +29,12 @@ function Navigation() {
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="fixed inset-x-0 top-0 z-30 w-full py-3 nav-shell js-navbar c-space">
+    <div className="fixed inset-x-0 top-0 z-30 w-full py-3 nav-shell js-navbar px-32 lg:px-48">
       <div className="mx-auto c-space  nav-inner">
         <div className="flex items-center justify-between py-2">
-          <a href="/" className="nav-brand" aria-label="Essabir home">
+          <a href="/#home" className="nav-brand" aria-label="Essabir home">
             <img
-              src="assets/logos/EssabirLogo.svg"
+              src="/assets/logos/EssabirLogo.svg"
               alt="Essabir logo"
               className="nav-brand__logo"
             />
@@ -44,7 +44,7 @@ const Navbar = () => {
             className="flex cursor-pointer text-neutral-300 hover:text-white focus:outline-none sm:hidden"
           >
             <img
-              src={isOpen ? "assets/close.svg" : "assets/menu.svg"}
+              src={isOpen ? "/assets/close.svg" : "/assets/menu.svg"}
               className="w-6 h-6"
               alt="toggle"
             />
