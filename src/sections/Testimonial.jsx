@@ -18,6 +18,8 @@ const ReviewCard = ({ img, name, username, body }) => {
           height="32"
           alt=""
           src={img}
+          loading="lazy"
+          decoding="async"
         />
         <div className="flex flex-col">
           <figcaption className="text-sm font-medium text-white">

@@ -32,7 +32,12 @@ const ProjectCard = ({ id, index, title, subtitle, image, list = [] }) => {
 
       <div className="latest-work__right">
         <div className="latest-work__device">
-          <img src={image} alt={`${title} preview`} loading="lazy" />
+          <img
+            src={image}
+            alt={`${title} preview`}
+            loading="lazy"
+            decoding="async"
+          />
         </div>
       </div>
     </a>

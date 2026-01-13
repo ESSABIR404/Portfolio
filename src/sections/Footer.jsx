@@ -159,6 +159,41 @@ const Footer = () => {
         },
         "-=0.25"
       );
+
+      if (services.length > 1) {
+        const setActiveService = (activeIndex) => {
+          services.forEach((item, index) => {
+            item.classList.toggle("is-active", index === activeIndex);
+          });
+        };
+
+        const serviceTimeline = gsap.timeline({ repeat: -1, paused: true });
+
+        services.forEach((item, index) => {
+          serviceTimeline
+            .call(() => {
+              setActiveService(index);
+              gsap.set(services, { autoAlpha: 0.55 });
+              gsap.set(item, { autoAlpha: 1 });
+            })
+            .fromTo(
+              item,
+              { y: 12 },
+              { y: 0, duration: 0.25, ease: "power2.out" }
+            )
+            .to({}, { duration: 0.75 });
+        });
+
+        ScrollTrigger.create({
+          trigger: footer,
+          start: "top 85%",
+          end: "bottom 15%",
+          onEnter: () => serviceTimeline.restart(true),
+          onEnterBack: () => serviceTimeline.play(),
+          onLeave: () => serviceTimeline.pause(),
+          onLeaveBack: () => serviceTimeline.pause(),
+        });
+      }
     }, footer);
 
     return () => ctx.revert();
@@ -212,9 +247,11 @@ const Footer = () => {
             <div className="site-footer__wordmark">
 
               <img
-              src="/assets/logos/EssabirLogoLinear.svg"
+              src="/assets/logos/EssabirLogo.svg"
               alt="Essabir logo"
               className="site-footer__logo"
+              loading="lazy"
+              decoding="async"
               />
               </div>
             <p className="site-footer__copy">

@@ -291,6 +291,7 @@ const About = () => {
                 src="assets/projects/wordpress-theme.jpg"
                 alt="Website preview"
                 loading="lazy"
+                decoding="async"
               />
             </div>
           </article>
@@ -403,12 +404,14 @@ const About = () => {
                   src="assets/projects/elearning.jpg"
                   alt="Mobile app interface preview"
                   loading="lazy"
+                  decoding="async"
                 />
                 <img
                   className="service-card__media-slide"
                   src="assets/projects/image2.png"
                   alt="Mobile app flow preview"
                   loading="lazy"
+                  decoding="async"
                 />
                 <img
                   className="service-card__media-slide"
@@ -416,6 +419,7 @@ const About = () => {
                   alt=""
                   aria-hidden="true"
                   loading="lazy"
+                  decoding="async"
                 />
                 <img
                   className="service-card__media-slide"
@@ -423,6 +427,7 @@ const About = () => {
                   alt=""
                   aria-hidden="true"
                   loading="lazy"
+                  decoding="async"
                 />
                 <img
                   className="service-card__media-slide"
@@ -430,6 +435,7 @@ const About = () => {
                   alt=""
                   aria-hidden="true"
                   loading="lazy"
+                  decoding="async"
                 />
                 <img
                   className="service-card__media-slide"
@@ -437,6 +443,7 @@ const About = () => {
                   alt=""
                   aria-hidden="true"
                   loading="lazy"
+                  decoding="async"
                 />
               </div>
             </div>

@@ -1,16 +1,14 @@
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense, lazy } from "react";
 import Navbar from "./sections/navbar";
 import Hero from "./sections/Hero";
 import About from "./sections/About";
 import LatestWork from "./sections/LatestWork";
 import LatestWorkPricing from "./components/LatestWorkPricing";
 import TidyCall from "./components/TidyCall";
-import Experiences from "./sections/Experiences";
-import Testimonial from "./sections/Testimonial";
-import Contact from "./sections/Contact";
 import Footer from './sections/Footer';
-import WorkDetail from "./sections/WorkDetail";
-import Works from "./sections/Works";
+
+const WorkDetail = lazy(() => import("./sections/WorkDetail"));
+const Works = lazy(() => import("./sections/Works"));
 
 const App = () => {
   const pathname = window.location.pathname;
@@ -48,7 +46,9 @@ const App = () => {
     return (
       <div className="w-full max-w-full ">
         <Navbar />
-        <WorkDetail id={workId} />
+        <Suspense fallback={null}>
+          <WorkDetail id={workId} />
+        </Suspense>
         <Footer />
       </div>
     );
@@ -58,7 +58,9 @@ const App = () => {
     return (
       <div className="w-full max-w-full ">
         <Navbar />
-        <Works />
+        <Suspense fallback={null}>
+          <Works />
+        </Suspense>
         <Footer />
       </div>
     );
@@ -68,12 +70,12 @@ const App = () => {
     <div className="w-full max-w-full ">
       <Navbar />
       <Hero />
-      <About />
-      <LatestWork />
-      <LatestWorkPricing />
-      <TidyCall />
-      {/* <Experiences />
-      <Contact /> */}
+      <main className="home-surface">
+        <About />
+        <LatestWork />
+        <LatestWorkPricing />
+        <TidyCall />
+      </main>
       <Footer/>
     </div>
   );

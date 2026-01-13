@@ -446,7 +446,11 @@ const WorkDetail = ({ id }) => {
 
         <div className="work-detail__media">
           <div className="work-detail__hero-media">
-            <img src={project.image} alt={`${project.title} hero`} />
+            <img
+              src={project.image}
+              alt={`${project.title} hero`}
+              decoding="async"
+            />
           </div>
           <div className="work-detail__grid">
             {project.gallery?.map((src, index) => (
@@ -454,7 +458,12 @@ const WorkDetail = ({ id }) => {
                 key={`${project.id}-gallery-${index}`}
                 className="work-detail__tile"
               >
-                <img src={src} alt={`${project.title} detail ${index + 1}`} />
+                <img
+                  src={src}
+                  alt={`${project.title} detail ${index + 1}`}
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
             ))}
           </div>
@@ -598,6 +607,8 @@ const WorkDetail = ({ id }) => {
                         className="work-detail__client-avatar"
                         src={client.avatar}
                         alt={`${client.name} portrait`}
+                        loading="lazy"
+                        decoding="async"
                       />
                     ) : (
                       <div className="work-detail__client-avatar work-detail__client-avatar--placeholder">
@@ -637,7 +648,12 @@ const WorkDetail = ({ id }) => {
                   href={`/works/${encodeURIComponent(item.id)}`}
                 >
                   <div className="work-detail__more-media">
-                    <img src={item.image} alt={`${item.title} preview`} />
+                    <img
+                      src={item.image}
+                      alt={`${item.title} preview`}
+                      loading="lazy"
+                      decoding="async"
+                    />
                   </div>
                   <div className="work-detail__more-meta">
                     <p className="work-detail__more-name">{item.title}</p>

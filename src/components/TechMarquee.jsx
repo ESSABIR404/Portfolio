@@ -53,14 +53,29 @@ export default function TechMarquee() {
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) return;
 
-    let rafId;
+    let rafId = null;
+    let resizeObserver;
+    let intersectionObserver;
+    let isHovered = false;
+    let isVisible = true;
+
+    const updatePlayback = () => {
+      const tween = tweenRef.current;
+      if (!tween) return;
+      if (!isVisible || isHovered) {
+        tween.pause();
+      } else {
+        tween.play();
+      }
+    };
 
     const setup = () => {
       tweenRef.current?.kill();
 
       const items = Array.from(track.children);
       const half = Math.floor(items.length / 2);
-      const gap = parseFloat(getComputedStyle(track).gap || "0");
+      const gapValue = parseFloat(getComputedStyle(track).gap);
+      const gap = Number.isFinite(gapValue) ? gapValue : 0;
 
       let setWidth = 0;
       for (let i = 0; i < half; i += 1) {
@@ -77,19 +92,32 @@ export default function TechMarquee() {
         duration: 40,
         ease: "none",
         repeat: -1,
+        paused: !isVisible || isHovered,
         modifiers: {
           x: (v) => `${wrapX(parseFloat(v))}px`,
         },
       });
+
+      updatePlayback();
     };
 
-    const handleImageLoad = () => {
+    const scheduleSetup = () => {
       if (rafId) cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(setup);
     };
 
-    setup();
-    window.addEventListener("resize", setup);
+    const handleImageLoad = () => {
+      scheduleSetup();
+    };
+
+    scheduleSetup();
+
+    if (typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(scheduleSetup);
+      resizeObserver.observe(wrap);
+    } else {
+      window.addEventListener("resize", scheduleSetup);
+    }
 
     const images = Array.from(track.querySelectorAll("img"));
     images.forEach((img) => {
@@ -97,13 +125,37 @@ export default function TechMarquee() {
       img.addEventListener("load", handleImageLoad);
     });
 
-    const onEnter = () => tweenRef.current?.pause();
-    const onLeave = () => tweenRef.current?.resume();
+    if (typeof IntersectionObserver !== "undefined") {
+      intersectionObserver = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (!entry) return;
+          isVisible = entry.isIntersecting;
+          updatePlayback();
+        },
+        { threshold: 0.15 }
+      );
+      intersectionObserver.observe(wrap);
+    }
+
+    const onEnter = () => {
+      isHovered = true;
+      updatePlayback();
+    };
+    const onLeave = () => {
+      isHovered = false;
+      updatePlayback();
+    };
     wrap.addEventListener("mouseenter", onEnter);
     wrap.addEventListener("mouseleave", onLeave);
 
     return () => {
-      window.removeEventListener("resize", setup);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      } else {
+        window.removeEventListener("resize", scheduleSetup);
+      }
+      if (intersectionObserver) intersectionObserver.disconnect();
       wrap.removeEventListener("mouseenter", onEnter);
       wrap.removeEventListener("mouseleave", onLeave);
       images.forEach((img) => img.removeEventListener("load", handleImageLoad));
@@ -129,6 +181,8 @@ export default function TechMarquee() {
                 src={logo.src}
                 alt={logo.name}
                 draggable="false"
+                loading="lazy"
+                decoding="async"
               />
             </span>
           ))}

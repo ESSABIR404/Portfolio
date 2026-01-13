@@ -1,26 +1,5 @@
 import { twMerge } from "tailwind-merge";
-import React, { useEffect, useRef, useState } from "react";
-
-function MousePosition() {
-  const [mousePosition, setMousePosition] = useState({
-    x: 0,
-    y: 0,
-  });
-
-  useEffect(() => {
-    const handleMouseMove = (event) => {
-      setMousePosition({ x: event.clientX, y: event.clientY });
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-    };
-  }, []);
-
-  return mousePosition;
-}
+import React, { useEffect, useRef } from "react";
 
 function hexToRgb(hex) {
   hex = hex.replace("#", "");
@@ -55,19 +34,73 @@ export const Particles = ({
   const canvasContainerRef = useRef(null);
   const context = useRef(null);
   const circles = useRef([]);
-  const mousePosition = MousePosition();
+  const mousePosition = useRef({ x: 0, y: 0 });
   const mouse = useRef({ x: 0, y: 0 });
   const canvasSize = useRef({ w: 0, h: 0 });
-  const dpr = typeof window !== "undefined" ? window.devicePixelRatio : 1;
+  const dpr =
+    typeof window !== "undefined"
+      ? Math.min(window.devicePixelRatio || 1, 1.5)
+      : 1;
   const rafID = useRef(null);
   const resizeTimeout = useRef(null);
+  const mouseRaf = useRef(null);
+  const isRunning = useRef(false);
+  const isVisible = useRef(true);
+  const prefersReduced = useRef(false);
 
   useEffect(() => {
-    if (canvasRef.current) {
-      context.current = canvasRef.current.getContext("2d");
+    const canvas = canvasRef.current;
+    const container = canvasContainerRef.current;
+    if (!canvas || !container) return;
+
+    context.current = canvas.getContext("2d");
+    if (!context.current) return;
+
+    const motionQuery = window.matchMedia
+      ? window.matchMedia("(prefers-reduced-motion: reduce)")
+      : null;
+    prefersReduced.current = motionQuery ? motionQuery.matches : false;
+
+    const handleVisibility = () => {
+      if (document.hidden || prefersReduced.current || !isVisible.current) {
+        stopAnimation();
+      } else {
+        startAnimation();
+      }
+    };
+
+    const onReduceMotionChange = (event) => {
+      prefersReduced.current = event.matches;
+      handleVisibility();
+    };
+
+    if (motionQuery?.addEventListener) {
+      motionQuery.addEventListener("change", onReduceMotionChange);
+    } else if (motionQuery?.addListener) {
+      motionQuery.addListener(onReduceMotionChange);
     }
+
+    const intersectionObserver =
+      typeof IntersectionObserver !== "undefined"
+        ? new IntersectionObserver(
+            (entries) => {
+              const entry = entries[0];
+              if (!entry) return;
+              isVisible.current = entry.isIntersecting;
+              handleVisibility();
+            },
+            { threshold: 0.1 }
+          )
+        : null;
+
+    if (intersectionObserver) {
+      intersectionObserver.observe(container);
+    }
+
     initCanvas();
-    animate();
+    if (!prefersReduced.current) {
+      startAnimation();
+    }
 
     const handleResize = () => {
       if (resizeTimeout.current) {
@@ -78,22 +111,50 @@ export const Particles = ({
       }, 200);
     };
 
+    const updateMousePosition = () => {
+      mouseRaf.current = null;
+      const rect = canvas.getBoundingClientRect();
+      const { w, h } = canvasSize.current;
+      const x = mousePosition.current.x - rect.left - w / 2;
+      const y = mousePosition.current.y - rect.top - h / 2;
+      const inside = x < w / 2 && x > -w / 2 && y < h / 2 && y > -h / 2;
+      if (inside) {
+        mouse.current.x = x;
+        mouse.current.y = y;
+      }
+    };
+
+    const handlePointerMove = (event) => {
+      mousePosition.current.x = event.clientX;
+      mousePosition.current.y = event.clientY;
+      if (!mouseRaf.current) {
+        mouseRaf.current = window.requestAnimationFrame(updateMousePosition);
+      }
+    };
+
     window.addEventListener("resize", handleResize);
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
-      if (rafID.current != null) {
-        window.cancelAnimationFrame(rafID.current);
-      }
+      stopAnimation();
       if (resizeTimeout.current) {
         clearTimeout(resizeTimeout.current);
       }
+      if (mouseRaf.current) {
+        window.cancelAnimationFrame(mouseRaf.current);
+      }
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("pointermove", handlePointerMove);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      if (intersectionObserver) intersectionObserver.disconnect();
+      if (motionQuery?.removeEventListener) {
+        motionQuery.removeEventListener("change", onReduceMotionChange);
+      } else if (motionQuery?.removeListener) {
+        motionQuery.removeListener(onReduceMotionChange);
+      }
     };
   }, [color]);
-
-  useEffect(() => {
-    onMouseMove();
-  }, [mousePosition.x, mousePosition.y]);
 
   useEffect(() => {
     initCanvas();
@@ -101,21 +162,6 @@ export const Particles = ({
 
   const initCanvas = () => {
     resizeCanvas();
-    drawParticles();
-  };
-
-  const onMouseMove = () => {
-    if (canvasRef.current) {
-      const rect = canvasRef.current.getBoundingClientRect();
-      const { w, h } = canvasSize.current;
-      const x = mousePosition.x - rect.left - w / 2;
-      const y = mousePosition.y - rect.top - h / 2;
-      const inside = x < w / 2 && x > -w / 2 && y < h / 2 && y > -h / 2;
-      if (inside) {
-        mouse.current.x = x;
-        mouse.current.y = y;
-      }
-    }
   };
 
   const resizeCanvas = () => {
@@ -127,7 +173,7 @@ export const Particles = ({
       canvasRef.current.height = canvasSize.current.h * dpr;
       canvasRef.current.style.width = `${canvasSize.current.w}px`;
       canvasRef.current.style.height = `${canvasSize.current.h}px`;
-      context.current.scale(dpr, dpr);
+      context.current.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       // Clear existing particles and create new ones with exact quantity
       circles.current = [];
@@ -183,21 +229,13 @@ export const Particles = ({
 
   const clearContext = () => {
     if (context.current) {
+      context.current.setTransform(dpr, 0, 0, dpr, 0, 0);
       context.current.clearRect(
         0,
         0,
         canvasSize.current.w,
         canvasSize.current.h
       );
-    }
-  };
-
-  const drawParticles = () => {
-    clearContext();
-    const particleCount = quantity;
-    for (let i = 0; i < particleCount; i++) {
-      const circle = circleParams();
-      drawCircle(circle);
     }
   };
 
@@ -208,6 +246,7 @@ export const Particles = ({
   };
 
   const animate = () => {
+    if (!isRunning.current) return;
     clearContext();
     circles.current.forEach((circle, i) => {
       // Handle the alpha value
@@ -255,6 +294,20 @@ export const Particles = ({
       }
     });
     rafID.current = window.requestAnimationFrame(animate);
+  };
+
+  const startAnimation = () => {
+    if (isRunning.current) return;
+    isRunning.current = true;
+    rafID.current = window.requestAnimationFrame(animate);
+  };
+
+  const stopAnimation = () => {
+    isRunning.current = false;
+    if (rafID.current != null) {
+      window.cancelAnimationFrame(rafID.current);
+      rafID.current = null;
+    }
   };
 
   return (

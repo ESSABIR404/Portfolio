@@ -15,14 +15,19 @@ const Works = () => {
         </div>
 
         <div className="works-page__grid">
-          {projects.map((project) => (
+          {projects.map((project, index) => (
             <a
               key={project.id}
               className="works-page__card"
               href={`/works/${encodeURIComponent(project.id)}`}
             >
               <div className="works-page__media">
-                <img src={project.image} alt={`${project.title} preview`} />
+                <img
+                  src={project.image}
+                  alt={`${project.title} preview`}
+                  loading={index < 2 ? "eager" : "lazy"}
+                  decoding="async"
+                />
               </div>
               <div className="works-page__meta">
                 <p className="works-page__name">{project.title}</p>
