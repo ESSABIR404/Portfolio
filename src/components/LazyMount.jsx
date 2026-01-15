@@ -1,5 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 
+/**
+ * Lazy mounting component that renders children only when visible in viewport.
+ * Uses IntersectionObserver for efficient viewport detection.
+ * Supports custom root margin for early/late loading and placeholder content.
+ *
+ * Props:
+ * - children: Content to render when visible
+ * - rootMargin: IntersectionObserver root margin (default: "200px")
+ * - minHeight: CSS min-height for content area
+ * - placeholder: Content to show while hidden
+ * - className: CSS classes for container
+ */
 const LazyMount = ({
   children,
   rootMargin = "200px",
@@ -9,30 +21,39 @@ const LazyMount = ({
 }) => {
   const ref = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
+  const animationFrameRef = useRef(null);
 
   useEffect(() => {
-    if (isVisible) return;
+    if (isVisible) return; // Skip if already visible
+
     const target = ref.current;
     if (!target) return;
 
-    let rafId = null;
+    // Reveal and schedule render on next frame for smooth transition
     const reveal = () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => setIsVisible(true));
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      animationFrameRef.current = requestAnimationFrame(() => {
+        setIsVisible(true);
+      });
     };
 
+    // Fall back to immediate reveal if IntersectionObserver unavailable
     if (typeof IntersectionObserver === "undefined") {
       reveal();
       return () => {
-        if (rafId) cancelAnimationFrame(rafId);
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+        }
       };
     }
 
+    // Set up observer with specified margin
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
-        if (!entry) return;
-        if (entry.isIntersecting) {
+        if (entry?.isIntersecting) {
           reveal();
           observer.disconnect();
         }
@@ -44,10 +65,13 @@ const LazyMount = ({
 
     return () => {
       observer.disconnect();
-      if (rafId) cancelAnimationFrame(rafId);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
     };
   }, [isVisible, rootMargin]);
 
+  // Use containIntrinsicSize for layout stability
   const wrapperStyle = minHeight
     ? { minHeight, containIntrinsicSize: minHeight }
     : undefined;

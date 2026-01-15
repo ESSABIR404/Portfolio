@@ -1,5 +1,10 @@
 import { Component } from "react";
 
+/**
+ * Error boundary component for graceful error handling.
+ * Catches errors in child components and displays fallback UI.
+ * Logs errors in development for debugging.
+ */
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
@@ -11,8 +16,10 @@ class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
-    // eslint-disable-next-line no-console
-    console.error("Suspended boundary caught an error:", error, info);
+    // Log errors in development only
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error boundary caught:", error, info);
+    }
   }
 
   render() {

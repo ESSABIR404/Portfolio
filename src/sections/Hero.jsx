@@ -1,7 +1,9 @@
+import { Suspense, lazy, useRef } from "react";
 import HeroText from "../components/HeroText";
 import ParallaxBackground from "../components/ParallaxBackground";
-import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import ErrorBoundary from "../components/ErrorBoundary";
+import { useWebGLCapability } from "../hooks/useWebGLCapability";
+import { useIntersectionLoad } from "../hooks/useIntersectionLoad";
 
 const HeroScene = lazy(() => import("../components/HeroScene"));
 
@@ -12,123 +14,20 @@ const HeroSceneFallback = () => (
   />
 );
 
-const isWebGLSupported = () => {
-  if (typeof document === "undefined") return true;
-  const canvas = document.createElement("canvas");
-  const gl =
-    canvas.getContext("webgl2") ||
-    canvas.getContext("webgl") ||
-    canvas.getContext("experimental-webgl");
-  return Boolean(gl);
-};
-
+/**
+ * Hero section with lazy-loaded 3D scene.
+ * Renders based on device capabilities and viewport visibility.
+ * Uses IntersectionObserver and requestIdleCallback for optimal loading timing.
+ */
 const Hero = () => {
   const sectionRef = useRef(null);
-  const [renderScene, setRenderScene] = useState(false);
-  const [allowScene, setAllowScene] = useState(false);
+  const canRenderWebGL = useWebGLCapability();
+  const shouldLoadScene = useIntersectionLoad(sectionRef, {
+    rootMargin: "150px",
+    timeout: 1000,
+  });
 
-  useEffect(() => {
-    const prefersReduced =
-      window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const saveData =
-      typeof navigator !== "undefined" &&
-      navigator.connection &&
-      navigator.connection.saveData;
-    const lowMemory =
-      typeof navigator !== "undefined" &&
-      typeof navigator.deviceMemory === "number" &&
-      navigator.deviceMemory <= 4;
-    const isMobile =
-      window.matchMedia && window.matchMedia("(max-width: 853px)").matches;
-    const hardwareConcurrency =
-      typeof navigator !== "undefined" ? navigator.hardwareConcurrency : undefined;
-    const connectionType =
-      typeof navigator !== "undefined" && navigator.connection?.effectiveType
-        ? navigator.connection.effectiveType.toLowerCase()
-        : "";
-    const slowConnectionTypes = ["slow-2g", "2g", "3g"];
-    const isSlowConnection =
-      connectionType && slowConnectionTypes.includes(connectionType);
-    const isLowConcurrency =
-      typeof hardwareConcurrency === "number" && hardwareConcurrency <= 4;
-
-    const shouldAvoidScene = isSlowConnection || isLowConcurrency;
-    setAllowScene(
-      !(prefersReduced || saveData || lowMemory || isMobile || shouldAvoidScene) &&
-        isWebGLSupported()
-    );
-  }, []);
-
-  useEffect(() => {
-    if (!allowScene || renderScene) return;
-    const target = sectionRef.current;
-    if (!target) return;
-
-    let idleId;
-    const loadScene = () => {
-      setRenderScene(true);
-    };
-    const scheduleIdle = () => {
-      if (typeof window === "undefined") {
-        loadScene();
-        return;
-      }
-      const callback =
-        window.requestIdleCallback ||
-        ((cb) => window.setTimeout(cb, 0));
-      idleId = callback(() => loadScene(), { timeout: 1000 });
-    };
-
-    const cleanupIdle = () => {
-      if (typeof window === "undefined" || idleId == null) {
-        idleId = null;
-        return;
-      }
-      if (window.cancelIdleCallback) {
-        window.cancelIdleCallback(idleId);
-      } else {
-        window.clearTimeout(idleId);
-      }
-      idleId = null;
-    };
-
-    const triggerLoad = () => {
-      cleanupIdle();
-      loadScene();
-    };
-
-    const observer =
-      typeof IntersectionObserver !== "undefined"
-        ? new IntersectionObserver(
-            (entries) => {
-              const entry = entries[0];
-              if (entry?.isIntersecting) {
-                triggerLoad();
-                observer.disconnect();
-              }
-            },
-            { rootMargin: "150px" }
-          )
-        : null;
-
-    if (observer) {
-      observer.observe(target);
-    }
-
-    target.addEventListener("pointerenter", triggerLoad, { once: true });
-    target.addEventListener("focus", triggerLoad, { once: true });
-    scheduleIdle();
-
-    return () => {
-      cleanupIdle();
-      if (observer) {
-        observer.disconnect();
-      }
-      target.removeEventListener("pointerenter", triggerLoad);
-      target.removeEventListener("focus", triggerLoad);
-    };
-  }, [allowScene, renderScene]);
+  const showScene = canRenderWebGL && shouldLoadScene;
 
   return (
     <section
@@ -139,7 +38,7 @@ const Hero = () => {
       <HeroText />
       <ParallaxBackground />
       <figure className="absolute inset-0 h-full w-full">
-        {allowScene && renderScene ? (
+        {showScene ? (
           <ErrorBoundary fallback={<HeroSceneFallback />}>
             <Suspense fallback={<HeroSceneFallback />}>
               <HeroScene />
