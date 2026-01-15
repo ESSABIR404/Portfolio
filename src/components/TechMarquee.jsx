@@ -1,57 +1,77 @@
-import { useEffect, useRef } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
+import { assetUrl } from "../utils/paths";
+
+const logoPath = (file) => assetUrl(`logos/marque/${file}`);
 
 const logos = [
-  { name: "Next.js", src: "assets/logos/marque/next.svg" },
-  { name: "React", src: "assets/logos/marque/react.svg" },
+  { name: "Next.js", src: logoPath("next.svg") },
+  { name: "React", src: logoPath("react.svg") },
   {
     name: "HTML5",
-    src: "assets/logos/marque/html5-with-wordmark-blackwhite-seeklogo 1.svg",
+    src: logoPath("html5-with-wordmark-blackwhite-seeklogo 1.svg"),
   },
-  { name: "CSS3", src: "assets/logos/marque/css-3-seeklogo 1.svg" },
+  { name: "CSS3", src: logoPath("css-3-seeklogo 1.svg") },
   {
     name: "JavaScript",
-    src: "assets/logos/marque/javascript-js-seeklogo 1.svg",
+    src: logoPath("javascript-js-seeklogo 1.svg"),
   },
   {
     name: "TypeScript",
-    src: "assets/logos/marque/typescript-seeklogo 1.svg",
+    src: logoPath("typescript-seeklogo 1.svg"),
   },
-  { name: "Figma", src: "assets/logos/marque/figma-seeklogo 1.svg" },
-  { name: "GitHub", src: "assets/logos/marque/github-seeklogo 1.svg" },
-  { name: "Node.js", src: "assets/logos/marque/node-js-seeklogo 1.svg" },
+  { name: "Figma", src: logoPath("figma-seeklogo 1.svg") },
+  { name: "GitHub", src: logoPath("github-seeklogo 1.svg") },
+  { name: "Node.js", src: logoPath("node-js-seeklogo 1.svg") },
   {
     name: "Framer",
-    src: "assets/logos/marque/framer-icon-seeklogo 1.svg",
+    src: logoPath("framer-icon-seeklogo 1.svg"),
   },
   {
     name: "Tailwind CSS",
-    src: "assets/logos/marque/tailwind-css-seeklogo 1.svg",
+    src: logoPath("tailwind-css-seeklogo 1.svg"),
   },
-  { name: "Vite", src: "assets/logos/marque/vite.svg" },
-  { name: "Vue", src: "assets/logos/marque/vue.svg" },
-  { name: "WordPress", src: "assets/logos/marque/wordpress.svg" },
+  { name: "Vite", src: logoPath("vite.svg") },
+  { name: "Vue", src: logoPath("vue.svg") },
+  { name: "WordPress", src: logoPath("wordpress.svg") },
   {
     name: "Shopify",
-    src: "assets/logos/marque/shopify-seeklogo 1.svg",
+    src: logoPath("shopify-seeklogo 1.svg"),
   },
-  { name: "Flutter", src: "assets/logos/marque/flutter-seeklogo 1.svg" },
+  { name: "Flutter", src: logoPath("flutter-seeklogo 1.svg") },
 ];
 
-export default function TechMarquee() {
+const TechMarquee = forwardRef(function TechMarquee(_, ref) {
   const wrapRef = useRef(null);
   const trackRef = useRef(null);
   const tweenRef = useRef(null);
+  const [prefersReduced, setPrefersReduced] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = (event) => setPrefersReduced(event.matches);
+    update(media);
+    if (media.addEventListener) {
+      media.addEventListener("change", update);
+    } else if (media.addListener) {
+      media.addListener(update);
+    }
+    return () => {
+      if (media.removeEventListener) {
+        media.removeEventListener("change", update);
+      } else if (media.removeListener) {
+        media.removeListener(update);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const wrap = wrapRef.current;
     const track = trackRef.current;
     if (!wrap || !track) return;
 
-    const reduce =
-      window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) return;
+    if (prefersReduced) return;
 
     let rafId = null;
     let resizeObserver;
@@ -162,12 +182,12 @@ export default function TechMarquee() {
       if (rafId) cancelAnimationFrame(rafId);
       tweenRef.current?.kill();
     };
-  }, []);
+  }, [prefersReduced]);
 
   const items = [...logos, ...logos];
 
   return (
-    <section className="logo-marquee" aria-label="Technology stack">
+    <section className="logo-marquee" aria-label="Technology stack" ref={ref}>
       <div className="logo-marquee__wrap" ref={wrapRef}>
         <div className="logo-marquee__track" ref={trackRef}>
           {items.map((logo, idx) => (
@@ -190,4 +210,6 @@ export default function TechMarquee() {
       </div>
     </section>
   );
-}
+});
+
+export default TechMarquee;

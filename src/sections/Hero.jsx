@@ -1,51 +1,87 @@
-import { Canvas, useFrame } from "@react-three/fiber";
 import HeroText from "../components/HeroText";
 import ParallaxBackground from "../components/ParallaxBackground";
-import { Astronaut } from "../components/Astronaut";
-import { Float } from "@react-three/drei";
-import { useMediaQuery } from "react-responsive";
-import { easing } from "maath";
-import { Suspense } from "react";
-import Loader from "../components/Loader";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
+
+const HeroScene = lazy(() => import("../components/HeroScene"));
 
 const Hero = () => {
-  const isMobile = useMediaQuery({ maxWidth: 853 });
+  const sectionRef = useRef(null);
+  const [loadScene, setLoadScene] = useState(false);
+  const [allowScene, setAllowScene] = useState(false);
+
+  useEffect(() => {
+    const prefersReduced =
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const saveData =
+      typeof navigator !== "undefined" &&
+      navigator.connection &&
+      navigator.connection.saveData;
+    const lowMemory =
+      typeof navigator !== "undefined" &&
+      typeof navigator.deviceMemory === "number" &&
+      navigator.deviceMemory <= 4;
+    const isMobile =
+      window.matchMedia && window.matchMedia("(max-width: 853px)").matches;
+
+    setAllowScene(!(prefersReduced || saveData || lowMemory || isMobile));
+  }, []);
+
+  useEffect(() => {
+    if (!allowScene) return;
+    const target = sectionRef.current;
+    if (!target) return;
+
+    let rafId = null;
+    const scheduleLoad = () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => setLoadScene(true));
+    };
+
+    if (typeof IntersectionObserver === "undefined") {
+      scheduleLoad();
+      return () => {
+        if (rafId) cancelAnimationFrame(rafId);
+      };
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        if (entry.isIntersecting) {
+          scheduleLoad();
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "150px" }
+    );
+
+    observer.observe(target);
+
+    return () => {
+      observer.disconnect();
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [allowScene]);
+
   return (
     <section
       id="home"
       className="relative flex w-full items-start justify-center min-h-screen overflow-hidden md:items-start md:justify-start c-space"
+      ref={sectionRef}
     >
       <HeroText />
       <ParallaxBackground />
       <figure className="absolute inset-0 h-full w-full">
-        <Canvas camera={{ position: [0, 1, 3] }} dpr={[1, 1.5]}>
-          <Suspense fallback={<Loader />}>
-            <Float>
-              <Astronaut
-                scale={isMobile && 0.23}
-                position={isMobile && [0, -1.5, 0]}
-              />
-            </Float>
-            <Rig />
+        {allowScene && loadScene ? (
+          <Suspense fallback={null}>
+            <HeroScene />
           </Suspense>
-        </Canvas>
+        ) : null}
       </figure>
     </section>
   );
 };
-
-function Rig() {
-  return useFrame((state, delta) => {
-    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
-    const x = clamp(state.mouse.x, -0.45, 0.45);
-    const y = clamp(state.mouse.y, -0.35, 0.35);
-    easing.damp3(
-      state.camera.position,
-      [x * 0.15, 1 + y * 0.15, 3],
-      0.5,
-      delta
-    );
-  });
-}
 
 export default Hero;

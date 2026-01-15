@@ -1,31 +1,66 @@
-"use client";
-import { useScroll, useTransform, motion } from "framer-motion";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { gsap, ScrollTrigger } from "../utils/gsap";
 
 export const Timeline = ({ data }) => {
-  const ref = useRef(null);
+  const contentRef = useRef(null);
   const containerRef = useRef(null);
+  const lineRef = useRef(null);
+  const progressRef = useRef(null);
   const [height, setHeight] = useState(0);
 
   useEffect(() => {
-    if (ref.current) {
-      const rect = ref.current.getBoundingClientRect();
+    const content = contentRef.current;
+    if (!content) return;
+
+    const update = () => {
+      const rect = content.getBoundingClientRect();
       setHeight(rect.height);
+    };
+
+    update();
+
+    let resizeObserver;
+    if (typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(update);
+      resizeObserver.observe(content);
+    } else {
+      window.addEventListener("resize", update);
     }
-  }, [ref]);
 
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start 10%", "end 50%"],
-  });
+    return () => {
+      if (resizeObserver) resizeObserver.disconnect();
+      else window.removeEventListener("resize", update);
+    };
+  }, []);
 
-  const heightTransform = useTransform(scrollYProgress, [0, 1], [0, height]);
-  const opacityTransform = useTransform(scrollYProgress, [0, 0.1], [0, 1]);
+  useEffect(() => {
+    const container = containerRef.current;
+    const progress = progressRef.current;
+    if (!container || !progress) return;
+
+    gsap.set(progress, { height: 0, opacity: 0 });
+
+    const ctx = gsap.context(() => {
+      gsap.to(progress, {
+        height,
+        opacity: 1,
+        ease: "none",
+        scrollTrigger: {
+          trigger: container,
+          start: "start 10%",
+          end: "end 50%",
+          scrub: true,
+        },
+      });
+    }, container);
+
+    return () => ctx.revert();
+  }, [height]);
 
   return (
     <div className="c-space section-spacing" ref={containerRef}>
       <h2 className="text-heading">My Work Experience</h2>
-      <div ref={ref} className="relative pb-20">
+      <div ref={contentRef} className="relative pb-20">
         {data.map((item, index) => (
           <div
             key={index}
@@ -56,16 +91,12 @@ export const Timeline = ({ data }) => {
           </div>
         ))}
         <div
-          style={{
-            height: height + "px",
-          }}
+          ref={lineRef}
+          style={{ height: height + "px" }}
           className="absolute md:left-1 left-1 top-0 overflow-hidden w-[2px] bg-[linear-gradient(to_bottom,var(--tw-gradient-stops))] from-transparent from-[0%] via-neutral-700 to-transparent to-[99%]  [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)] "
         >
-          <motion.div
-            style={{
-              height: heightTransform,
-              opacity: opacityTransform,
-            }}
+          <div
+            ref={progressRef}
             className="absolute inset-x-0 top-0  w-[2px] bg-gradient-to-t from-purple-500 via-lavender/50 to-transparent from-[0%] via-[10%] rounded-full"
           />
         </div>

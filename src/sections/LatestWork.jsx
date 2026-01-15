@@ -1,13 +1,18 @@
 import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { gsap, ScrollTrigger } from "../utils/gsap";
 import ProjectCard from "../components/ProjectCard";
 import projects from "../data/projects";
-
-gsap.registerPlugin(ScrollTrigger);
+import { routeUrl } from "../utils/paths";
 
 const LatestWork = () => {
   const sectionRef = useRef(null);
+  const frameRef = useRef(null);
+  const metaNumberRef = useRef(null);
+  const metaTitleRef = useRef(null);
+  const metaSubRef = useRef(null);
+  const metaListRefs = useRef([]);
+  const itemRefs = useRef([]);
+  const deviceRefs = useRef([]);
 
   const list = projects.map((project) => project.title);
   const renderMetaList = (keyPrefix) => (
@@ -17,6 +22,9 @@ const LatestWork = () => {
           key={`${keyPrefix}-${name}-${idx}`}
           className={`latest-work__list-item${idx === 0 ? " is-active" : ""}`}
           data-index={idx}
+          ref={(el) => {
+            metaListRefs.current[idx] = el;
+          }}
         >
           {name}
         </li>
@@ -32,24 +40,14 @@ const LatestWork = () => {
 
     mm.add("(min-width: 901px)", () => {
       const ctx = gsap.context(() => {
-        const frame = section.querySelector(".latest-work__frame");
-        const items = gsap.utils.toArray(".latest-work__item", frame);
+        const frame = frameRef.current;
+        const items = itemRefs.current.filter(Boolean);
         if (!frame || items.length === 0) return;
 
-        const metaLayer = frame.querySelector(".latest-work__meta-layer");
-        const metaNumber = metaLayer
-          ? metaLayer.querySelector(".latest-work__meta-number")
-          : null;
-        const metaTitle = metaLayer
-          ? metaLayer.querySelector(".latest-work__meta-title")
-          : null;
-        const metaSub = metaLayer
-          ? metaLayer.querySelector(".latest-work__meta-sub")
-          : null;
-        const metaListItems = gsap.utils.toArray(
-          ".latest-work__meta-panel .latest-work__list-item",
-          frame
-        );
+        const metaNumber = metaNumberRef.current;
+        const metaTitle = metaTitleRef.current;
+        const metaSub = metaSubRef.current;
+        const metaListItems = metaListRefs.current.filter(Boolean);
         const prefersReduced = window.matchMedia(
           "(prefers-reduced-motion: reduce)"
         ).matches;
@@ -172,8 +170,8 @@ const LatestWork = () => {
 
         updateMeta(0, false);
 
-        items.forEach((item) => {
-          const device = item.querySelector(".latest-work__device");
+        items.forEach((item, index) => {
+          const device = deviceRefs.current[index];
           if (!device) return;
           if (prefersReduced) {
             gsap.set(device, { scale: 1 });
@@ -240,21 +238,30 @@ const LatestWork = () => {
     >
       <h2 className="latest-work__heading">Latest work</h2>
 
-      <div className="latest-work__frame">
+      <div className="latest-work__frame" ref={frameRef}>
         {/* Shared meta panel */}
         <div className="latest-work__meta-panel" aria-hidden>
           <div className="latest-work__meta-layer">
             <div className="latest-work__meta-top">
-              <div className="latest-work__meta-number latest-work__roll">
+              <div
+                className="latest-work__meta-number latest-work__roll"
+                ref={metaNumberRef}
+              >
                 <span className="latest-work__roll-current">01.</span>
               </div>
               {renderMetaList("meta")}
             </div>
             <div className="latest-work__meta-bottom">
-              <h3 className="latest-work__meta-title latest-work__roll">
+              <h3
+                className="latest-work__meta-title latest-work__roll"
+                ref={metaTitleRef}
+              >
                 <span className="latest-work__roll-current">Arjuna</span>
               </h3>
-              <p className="latest-work__meta-sub latest-work__roll">
+              <p
+                className="latest-work__meta-sub latest-work__roll"
+                ref={metaSubRef}
+              >
                 <span className="latest-work__roll-current">
                   Personal Portfolio Website for talented design engineer
                 </span>
@@ -274,14 +281,19 @@ const LatestWork = () => {
             key={project.id}
             {...project}
             index={index}
-            list={list}
+            ref={(el) => {
+              itemRefs.current[index] = el;
+            }}
+            deviceRef={(el) => {
+              deviceRefs.current[index] = el;
+            }}
           />
         ))}
       </div>
 
       <div className="latest-work__cta-row mb-12">
         <div className="item button-parrot" style={{ "--bg-color": "#2c3e50" }}>
-          <a href="/works" className="btn-pill latest-work__cta-button">
+          <a href={routeUrl("works")} className="btn-pill latest-work__cta-button">
             More projects
             <div className="parrot" aria-hidden="true"></div>
             <div className="parrot" aria-hidden="true"></div>

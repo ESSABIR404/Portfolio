@@ -1,6 +1,6 @@
 # 🚀 3D Developer Portfolio
 
-A modern, animated 3D developer portfolio built with React, Three.js, TailwindCSS, and motion effects — designed to help you stand out and showcase your skills creatively.
+A modern, animated 3D developer portfolio built with React, Three.js, TailwindCSS, and GSAP — designed to help you stand out and showcase your skills creatively.
 
 ![3d Portfolio Screenshot GitHub](https://github.com/user-attachments/assets/9b0ed20e-074e-4f2a-81d8-20c9da751e9e)
 
@@ -22,10 +22,9 @@ A modern, animated 3D developer portfolio built with React, Three.js, TailwindCS
 ## ✨ Features
 
 - 🔥 3D visuals powered by **React Three Fiber** and **Drei**
-- ⚡ Smooth transitions and scroll-based animations using **Framer Motion**
+- ⚡ Smooth transitions and scroll-based animations using **GSAP**
 - 🎨 Clean, responsive UI with **TailwindCSS**
 - 💌 Working contact form using **EmailJS**
-- 🧱 Beautiful UI enhancements with **Aceternity UI** and **Magic UI**
 - 🚀 Lightning-fast development with **Vite**
 
 ---
@@ -39,10 +38,8 @@ A modern, animated 3D developer portfolio built with React, Three.js, TailwindCS
 | TailwindCSS       | Utility-first CSS framework           |
 | React Three Fiber | 3D rendering with Three.js in React   |
 | Drei              | Helpers and abstractions for R3F      |
-| Framer Motion     | Animation library for React           |
+| GSAP              | Animation library for the web         |
 | EmailJS           | Form handling and email integration   |
-| Aceternity UI     | Custom UI components                  |
-| Magic UI          | Prebuilt UI elements and design extras|
 
 ---
 

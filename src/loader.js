@@ -21,6 +21,7 @@ let isClosed = false;
 let introPrepared = false;
 let pointsDelay = [];
 let allPoints = [];
+let prefersReducedMotion = false;
 
 const tl = gsap.timeline({
   onUpdate: render,
@@ -35,6 +36,7 @@ function getIntroTargets() {
 }
 
 function prepIntroAnimations() {
+  if (prefersReducedMotion) return;
   if (introPrepared) return;
   const { nav, navItems, heroItems } = getIntroTargets();
   const hasTargets = nav || navItems.length || heroItems.length;
@@ -52,7 +54,25 @@ function prepIntroAnimations() {
   introPrepared = true;
 }
 
+function revealIntroImmediate() {
+  const { nav, navItems, heroItems } = getIntroTargets();
+  if (nav) {
+    gsap.set(nav, { autoAlpha: 1, y: 0, filter: "blur(0px)" });
+  }
+  if (navItems.length) {
+    gsap.set(navItems, { autoAlpha: 1, y: 0, filter: "blur(0px)" });
+  }
+  if (heroItems.length) {
+    gsap.set(heroItems, { autoAlpha: 1, y: 0, filter: "blur(0px)" });
+  }
+  introPrepared = true;
+}
+
 function playIntroAnimations() {
+  if (prefersReducedMotion) {
+    revealIntroImmediate();
+    return;
+  }
   const { nav, navItems, heroItems } = getIntroTargets();
   const tlIntro = gsap.timeline({
     defaults: { ease: "power2.out", duration: 0.85 },
@@ -143,6 +163,10 @@ export const initOverlayLoader = () => {
 
   title = document.querySelector(TITLE_SELECTOR);
 
+  prefersReducedMotion =
+    window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   numPaths = paths.length;
   isClosed = false;
   overlay.style.display = "block";
@@ -151,6 +175,19 @@ export const initOverlayLoader = () => {
     title.classList.remove("is-hidden");
     title.style.display = "flex";
     title.setAttribute("aria-hidden", "false");
+  }
+
+  if (prefersReducedMotion) {
+    overlay.setAttribute("aria-hidden", "true");
+    overlay.style.display = "none";
+    if (title) {
+      title.classList.add("is-hidden");
+      title.style.display = "none";
+      title.setAttribute("aria-hidden", "true");
+    }
+    revealIntroImmediate();
+    isClosed = true;
+    return;
   }
 
   prepIntroAnimations();

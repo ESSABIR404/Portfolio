@@ -20,7 +20,7 @@ function hexToRgb(hex) {
 
 export const Particles = ({
   className = "",
-  quantity = 100,
+  quantity = 60,
   staticity = 50,
   ease = 50,
   size = 0.4,
@@ -248,7 +248,8 @@ export const Particles = ({
   const animate = () => {
     if (!isRunning.current) return;
     clearContext();
-    circles.current.forEach((circle, i) => {
+    for (let i = circles.current.length - 1; i >= 0; i -= 1) {
+      const circle = circles.current[i];
       // Handle the alpha value
       const edge = [
         circle.x + circle.translateX - circle.size, // distance from left edge
@@ -292,7 +293,7 @@ export const Particles = ({
         const newCircle = circleParams();
         drawCircle(newCircle);
       }
-    });
+    }
     rafID.current = window.requestAnimationFrame(animate);
   };
 

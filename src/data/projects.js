@@ -1,3 +1,5 @@
+import { assetUrl } from "../utils/paths";
+
 const projects = [
   {
     id: "arjuna",
@@ -9,7 +11,7 @@ const projects = [
       "Arjuna is a skilled design engineer with a strong portfolio, but his online presence did not reflect the quality of his work. He needed a personal site that could showcase his experience, process, and personality, while also making it easy for potential clients or teams to reach out. The old layout felt flat, lacked structure, and did not support storytelling.",
     solutions:
       "We built a sleek one-page website designed to highlight work without feeling overwhelming. The layout is structured around clarity with curated case studies, bold typography, and clear calls to action so visitors can understand his value quickly and get in touch.",
-    solutionVideo: "/assets/video/project1.mp4",
+    solutionVideo: assetUrl("video/project1.mp4"),
     results: {
       summary:
         "Arjuna's site now reflects his skill and focus, helping him stand out in a competitive industry and connect with more aligned opportunities.",
@@ -23,7 +25,7 @@ const projects = [
           "Working with Essabir felt personal. The process was smooth, the design was stunning, and everything had meaning.",
         name: "Arjuna Ibrahim",
         role: "Design Engineer",
-                avatar: "/assets/clients/client1.png",
+        avatar: assetUrl("clients/client1.png"),
         company: "Self-employed",
       },
     },
@@ -31,10 +33,10 @@ const projects = [
     timeline: "3 Months",
     services: ["Website", "Branding"],
     liveUrl: "https://example.com",
-    image: "/assets/projects/imag3.png",
+    image: assetUrl("projects/imag3.png"),
     gallery: [
-      "/assets/projects/accessories.jpg",
-      "/assets/projects/auth-system.jpg",
+      assetUrl("projects/accessories.jpg"),
+      assetUrl("projects/auth-system.jpg"),
     ],
   },
   {
@@ -47,7 +49,7 @@ const projects = [
       "The team needed to explain complex AI automation services while still feeling fast, modern, and trustworthy. The previous site lacked hierarchy and did not communicate outcomes or differentiation. They also needed a flexible system to scale content as services evolved.",
     solutions:
       "We created a bold identity and modular marketing site with narrative sections, outcome-led messaging, and motion accents. The new layout balances credibility with speed, and the component system supports ongoing updates without redesigning pages.",
-    solutionVideo: "/assets/video/project1.mp4",
+    solutionVideo: assetUrl("video/project1.mp4"),
     results: {
       summary:
         "Bima's marketing site now explains complex automation services with clarity while converting interest into qualified conversations.",
@@ -62,17 +64,17 @@ const projects = [
         name: "Liam Chen",
         role: "COO",
         company: "Bima",
-        avatar: "/assets/clients/client1.png",
+        avatar: assetUrl("clients/client1.png"),
       },
     },
     year: "2024",
     timeline: "8 Weeks",
     services: ["Website", "Branding", "Strategy"],
     liveUrl: "https://example.com",
-    image: "/assets/projects/image.png",
+    image: assetUrl("projects/image.png"),
     gallery: [
-      "/assets/projects/elearning.jpg",
-      "/assets/projects/game-engine.jpg",
+      assetUrl("projects/elearning.jpg"),
+      assetUrl("projects/game-engine.jpg"),
     ],
   },
   {
@@ -85,7 +87,7 @@ const projects = [
       "Mandala needed a premium commerce experience that felt cinematic while still converting. The existing store felt generic and did not elevate the product story or craft. They also needed a clearer path from discovery to checkout.",
     solutions:
       "We designed a refined storefront with immersive imagery, restrained UI, and a guided product flow. The new experience highlights craft and materials, while the purchase journey stays simple and fast.",
-    solutionVideo: "/assets/video/project1.mp4",
+    solutionVideo: assetUrl("video/project1.mp4"),
     results: {
       summary:
         "The new storefront elevated Mandala's brand perception and improved the path to purchase across desktop and mobile.",
@@ -100,7 +102,7 @@ const projects = [
         name: "Dianna Sulastri",
         role: "Founder",
         company: "Mandala",
-                avatar: "/assets/clients/client1.png",
+        avatar: assetUrl("clients/client1.png"),
 
       },
     },
@@ -108,10 +110,10 @@ const projects = [
     timeline: "10 Weeks",
     services: ["Website", "Ecommerce", "Visual Design"],
     liveUrl: "https://example.com",
-    image: "/assets/projects/image2.png",
+    image: assetUrl("projects/image2.png"),
     gallery: [
-      "/assets/projects/wordpress-theme.jpg",
-      "/assets/projects/blazor-app.jpg",
+      assetUrl("projects/wordpress-theme.jpg"),
+      assetUrl("projects/blazor-app.jpg"),
     ],
   },
 ];

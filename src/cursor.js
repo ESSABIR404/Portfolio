@@ -3,12 +3,23 @@ import { gsap } from "gsap";
 let isReady = false;
 
 export const initCursor = () => {
-  if (isReady) return;
+  if (isReady) return () => {};
 
   const dot = document.getElementById("cursor-dot");
   const ring = document.getElementById("cursor-ring");
   const project = document.getElementById("cursor-project");
   if (!dot || !ring) return;
+
+  const isCoarsePointer =
+    (window.matchMedia &&
+      window.matchMedia("(pointer: coarse)").matches) ||
+    (typeof navigator !== "undefined" && navigator.maxTouchPoints > 0);
+  if (isCoarsePointer) {
+    [dot, ring, project].forEach((el) => {
+      if (el) el.style.display = "none";
+    });
+    return () => {};
+  }
 
   isReady = true;
 
@@ -27,16 +38,25 @@ export const initCursor = () => {
     ? gsap.quickTo(project, "y", { duration: 0.2, ease: "power3.out" })
     : null;
 
+  let rafId = null;
+  let lastPointer = null;
+
   const handleMove = (event) => {
-    const { clientX, clientY } = event;
-    moveDotX(clientX);
-    moveDotY(clientY);
-    moveRingX(clientX);
-    moveRingY(clientY);
-    if (moveProjectX && moveProjectY) {
-      moveProjectX(clientX);
-      moveProjectY(clientY);
-    }
+    lastPointer = { x: event.clientX, y: event.clientY };
+    if (rafId) return;
+    rafId = window.requestAnimationFrame(() => {
+      rafId = null;
+      if (!lastPointer) return;
+      const { x, y } = lastPointer;
+      moveDotX(x);
+      moveDotY(y);
+      moveRingX(x);
+      moveRingY(y);
+      if (moveProjectX && moveProjectY) {
+        moveProjectX(x);
+        moveProjectY(y);
+      }
+    });
   };
 
   const handleDown = () => {
@@ -49,10 +69,12 @@ export const initCursor = () => {
     gsap.to(dot, { scale: 1, duration: 0.2, ease: "power2.out" });
   };
 
-  window.addEventListener("pointermove", handleMove);
+  window.addEventListener("pointermove", handleMove, { passive: true });
   window.addEventListener("pointerdown", handleDown);
   window.addEventListener("pointerup", handleUp);
 
+  let handleProjectOver;
+  let handleProjectOut;
   if (project) {
     const showProjectCursor = () => {
       gsap.to(project, {
@@ -87,12 +109,12 @@ export const initCursor = () => {
     const getProjectTarget = (target) =>
       target && target.closest ? target.closest(projectSelector) : null;
 
-    const handleProjectOver = (event) => {
+    handleProjectOver = (event) => {
       if (!getProjectTarget(event.target)) return;
       showProjectCursor();
     };
 
-    const handleProjectOut = (event) => {
+    handleProjectOut = (event) => {
       const leftTarget = getProjectTarget(event.target);
       if (!leftTarget) return;
       if (getProjectTarget(event.relatedTarget) === leftTarget) return;
@@ -103,25 +125,58 @@ export const initCursor = () => {
     window.addEventListener("pointerout", handleProjectOut);
   }
 
-  const interactives = document.querySelectorAll("a, button, .btn-neon, .nav-link");
-  interactives.forEach((el) => {
-    el.addEventListener("pointerenter", () => {
-      gsap.to(ring, {
-        scale: 1.45,
-        borderColor: "rgba(96, 221, 255, 0.9)",
-        boxShadow: "0 0 18px rgba(96, 221, 255, 0.6)",
-        duration: 0.2,
-        ease: "power2.out",
-      });
+  const interactiveSelector = "a, button, .btn-neon, .nav-link";
+  let activeInteractive = null;
+  const handleInteractiveOver = (event) => {
+    const target = event.target;
+    if (!target || !target.closest) return;
+    const interactive = target.closest(interactiveSelector);
+    if (!interactive || interactive === activeInteractive) return;
+    activeInteractive = interactive;
+    gsap.to(ring, {
+      scale: 1.45,
+      borderColor: "rgba(96, 221, 255, 0.9)",
+      boxShadow: "0 0 18px rgba(96, 221, 255, 0.6)",
+      duration: 0.2,
+      ease: "power2.out",
     });
-    el.addEventListener("pointerleave", () => {
-      gsap.to(ring, {
-        scale: 1,
-        borderColor: "rgba(122, 87, 219, 0.55)",
-        boxShadow: "0 0 14px rgba(122, 87, 219, 0.4)",
-        duration: 0.2,
-        ease: "power2.out",
-      });
+  };
+  const handleInteractiveOut = (event) => {
+    if (!activeInteractive) return;
+    const target = event.target;
+    if (!target || !target.closest) return;
+    const interactive = target.closest(interactiveSelector);
+    if (!interactive || interactive !== activeInteractive) return;
+    if (event.relatedTarget && activeInteractive.contains(event.relatedTarget)) {
+      return;
+    }
+    activeInteractive = null;
+    gsap.to(ring, {
+      scale: 1,
+      borderColor: "rgba(122, 87, 219, 0.55)",
+      boxShadow: "0 0 14px rgba(122, 87, 219, 0.4)",
+      duration: 0.2,
+      ease: "power2.out",
     });
-  });
+  };
+  window.addEventListener("pointerover", handleInteractiveOver);
+  window.addEventListener("pointerout", handleInteractiveOut);
+
+  return () => {
+    window.removeEventListener("pointermove", handleMove);
+    window.removeEventListener("pointerdown", handleDown);
+    window.removeEventListener("pointerup", handleUp);
+    if (handleProjectOver) {
+      window.removeEventListener("pointerover", handleProjectOver);
+    }
+    if (handleProjectOut) {
+      window.removeEventListener("pointerout", handleProjectOut);
+    }
+    window.removeEventListener("pointerover", handleInteractiveOver);
+    window.removeEventListener("pointerout", handleInteractiveOut);
+    if (rafId) {
+      window.cancelAnimationFrame(rafId);
+    }
+    isReady = false;
+  };
 };

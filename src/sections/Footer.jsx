@@ -1,8 +1,6 @@
 import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import { gsap, ScrollTrigger } from "../utils/gsap";
+import { assetUrl } from "../utils/paths";
 
 const footerLinks = [
   { label: "Work", href: "#latest-work" },
@@ -247,11 +245,11 @@ const Footer = () => {
             <div className="site-footer__wordmark">
 
               <img
-              src="/assets/logos/EssabirLogo.svg"
-              alt="Essabir logo"
-              className="site-footer__logo"
-              loading="lazy"
-              decoding="async"
+                src={assetUrl("logos/EssabirLogo.svg")}
+                alt="Essabir logo"
+                className="site-footer__logo"
+                loading="lazy"
+                decoding="async"
               />
               </div>
             <p className="site-footer__copy">

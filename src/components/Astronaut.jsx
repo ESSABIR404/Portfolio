@@ -6,19 +6,53 @@ Source: https://sketchfab.com/3d-models/tenhun-falling-spaceman-fanart-9fd80b6a2
 Title: Tenhun Falling spaceman (FanArt)
 */
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { useGLTF, useAnimations } from "@react-three/drei";
-import { useMotionValue, useSpring } from "motion/react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
+import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader.js";
 import { closeOverlayLoader } from "../loader";
+import { withBase } from "../utils/paths";
 import { easing } from "maath";
 
-const MODEL_URL = `${import.meta.env.BASE_URL}models/tenhun_falling_spaceman_fanart.glb`;
+const MODEL_URLS = {
+  high: withBase("models/astronaut/tenhun_falling_spaceman_fanart_lod0.glb"),
+  medium: withBase("models/astronaut/tenhun_falling_spaceman_fanart_lod1.glb"),
+  low: withBase("models/astronaut/tenhun_falling_spaceman_fanart_lod2.glb"),
+};
 
-export function Astronaut(props) {
+const disposeMaterial = (material) => {
+  if (!material) return;
+  Object.values(material).forEach((value) => {
+    if (value && value.isTexture) {
+      value.dispose();
+    }
+  });
+  if (material.dispose) {
+    material.dispose();
+  }
+};
+
+const damp = (current, target, lambda, delta) =>
+  current + (target - current) * (1 - Math.exp(-lambda * delta));
+
+export function Astronaut({ quality = "high", active = true, ...props }) {
   const group = useRef();
   const baseRotation = useRef([6, -0.6, 0]);
-  const { scene, animations } = useGLTF(MODEL_URL);
+  const currentY = useRef(5);
+  const targetY = useRef(-1);
+  const { gl } = useThree();
+
+  const modelUrl = MODEL_URLS[quality] || MODEL_URLS.high;
+  const ktx2Loader = useMemo(() => {
+    const loader = new KTX2Loader();
+    loader.setTranscoderPath(withBase("basis/"));
+    loader.detectSupport(gl);
+    return loader;
+  }, [gl]);
+
+  const { scene, animations } = useGLTF(modelUrl, false, true, (loader) => {
+    loader.setKTX2Loader(ktx2Loader);
+  });
   const { actions } = useAnimations(animations, group);
   useEffect(() => {
     if (animations.length > 0) {
@@ -28,15 +62,33 @@ export function Astronaut(props) {
   useEffect(() => {
     closeOverlayLoader();
   }, []);
-
-  const yPosition = useMotionValue(5);
-  const ySpring = useSpring(yPosition, { damping: 40 });
   useEffect(() => {
-    ySpring.set(-1);
-  }, [ySpring]);
+    currentY.current = 5;
+  }, [modelUrl]);
+  useEffect(() => {
+    return () => {
+      scene.traverse((child) => {
+        if (!child.isMesh) return;
+        if (child.geometry) {
+          child.geometry.dispose();
+        }
+        const material = child.material;
+        if (Array.isArray(material)) {
+          material.forEach(disposeMaterial);
+        } else {
+          disposeMaterial(material);
+        }
+      });
+      useGLTF.clear(modelUrl);
+      ktx2Loader.dispose();
+    };
+  }, [ktx2Loader, modelUrl, scene]);
+
   useFrame((state, delta) => {
+    if (!active) return;
     if (!group.current) return;
-    group.current.position.y = ySpring.get();
+    currentY.current = damp(currentY.current, targetY.current, 4, delta);
+    group.current.position.y = currentY.current;
 
     const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
     const x = clamp(state.mouse.x, -0.5, 0.5);
@@ -61,5 +113,3 @@ export function Astronaut(props) {
     </group>
   );
 }
-
-useGLTF.preload(MODEL_URL);

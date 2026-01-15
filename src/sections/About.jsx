@@ -1,13 +1,15 @@
 import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { gsap, ScrollTrigger } from "../utils/gsap";
 import TechMarquee from "../components/TechMarquee";
-
-gsap.registerPlugin(ScrollTrigger);
+import { assetUrl } from "../utils/paths";
 
 const About = () => {
   const mobileSliderRef = useRef(null);
   const sectionRef = useRef(null);
+  const headerRefs = useRef([]);
+  const cardRefs = useRef([]);
+  const mediaRefs = useRef([]);
+  const marqueeRef = useRef(null);
 
   useEffect(() => {
     const track = mobileSliderRef.current;
@@ -22,7 +24,9 @@ const About = () => {
 
     const setup = () => {
       if (tween) tween.kill();
-      const slides = Array.from(track.querySelectorAll("img"));
+      const slides = Array.from(track.children).filter(
+        (node) => node.tagName === "IMG"
+      );
       const sets = Number(track.dataset.sets || 2);
       const setSize = Math.floor(slides.length / sets);
       if (!setSize) return;
@@ -70,27 +74,20 @@ const About = () => {
     if (prefersReduced) return;
 
     const ctx = gsap.context(() => {
-      const header = gsap.utils.toArray(
-        ".services-title, .services-cta",
-        section
-      );
-      const cards = gsap.utils.toArray(".service-card", section);
-      const marquee = section.querySelector(".logo-marquee");
-      const media = gsap.utils.toArray(
-        ".service-card__media, .service-card__media-slider",
-        section
-      );
+      const header = headerRefs.current.filter(Boolean);
+      const cards = cardRefs.current.filter(Boolean);
+      const marquee = marqueeRef.current;
+      const media = mediaRefs.current.filter(Boolean);
 
-      gsap.set(header, { autoAlpha: 0, y: 24, filter: "blur(6px)" });
+      gsap.set(header, { autoAlpha: 0, y: 24 });
       gsap.set(cards, {
         autoAlpha: 0,
         y: 48,
-        filter: "blur(8px)",
         scale: 0.98,
         transformPerspective: 1200,
       });
       if (marquee) {
-        gsap.set(marquee, { autoAlpha: 0, y: 32, filter: "blur(8px)" });
+        gsap.set(marquee, { autoAlpha: 0, y: 32 });
       }
 
       gsap.timeline({
@@ -103,7 +100,6 @@ const About = () => {
         .to(header, {
           autoAlpha: 1,
           y: 0,
-          filter: "blur(0px)",
           duration: 0.8,
           ease: "power2.out",
           stagger: 0.1,
@@ -131,7 +127,6 @@ const About = () => {
               x: getCardOffsetX(card),
               rotateX: direction === "down" ? -6 : 6,
               scale: 0.98,
-              filter: "blur(8px)",
             },
             {
               autoAlpha: 1,
@@ -139,7 +134,6 @@ const About = () => {
               x: 0,
               rotateX: 0,
               scale: 1,
-              filter: "blur(0px)",
               duration: 1.0,
               ease: "power2.out",
               delay: index * 0.08,
@@ -164,7 +158,6 @@ const About = () => {
             gsap.to(marquee, {
               autoAlpha: 1,
               y: 0,
-              filter: "blur(0px)",
               duration: 0.9,
               ease: "power2.out",
               overwrite: true,
@@ -172,11 +165,10 @@ const About = () => {
           onEnterBack: () =>
             gsap.fromTo(
               marquee,
-              { autoAlpha: 0, y: -28, filter: "blur(6px)" },
+              { autoAlpha: 0, y: -28 },
               {
                 autoAlpha: 1,
                 y: 0,
-                filter: "blur(0px)",
                 duration: 0.9,
                 ease: "power2.out",
                 overwrite: true,
@@ -212,11 +204,21 @@ const About = () => {
       ref={sectionRef}
     >
       <div className="services-header">
-        <h2 className="services-title">How I Can Help Your Business</h2>
+        <h2
+          className="services-title"
+          ref={(el) => {
+            headerRefs.current[0] = el;
+          }}
+        >
+          How I Can Help Your Business
+        </h2>
         <a
           className="services-cta button1"
           href="#contact"
           style={{ "--clr": "#7808d0" }}
+          ref={(el) => {
+            headerRefs.current[1] = el;
+          }}
         >
           Get in Touch
           <span className="button1__icon-wrapper" aria-hidden="true">
@@ -251,7 +253,12 @@ const About = () => {
 
       <div className="services-grid">
         <div className="services-column">
-          <article className="service-card service-card--xl">
+          <article
+            className="service-card service-card--xl"
+            ref={(el) => {
+              cardRefs.current[0] = el;
+            }}
+          >
             <div className="service-card__head">
               <span className="service-card__icon">
                 <svg
@@ -286,9 +293,14 @@ const About = () => {
               and SEO-ready foundations. I blend design and engineering to
               create fast, conversion-focused experiences.
             </p>
-            <div className="service-card__media">
+            <div
+              className="service-card__media"
+              ref={(el) => {
+                mediaRefs.current[0] = el;
+              }}
+            >
               <img
-                src="assets/projects/wordpress-theme.jpg"
+                src={assetUrl("projects/wordpress-theme.jpg")}
                 alt="Website preview"
                 loading="lazy"
                 decoding="async"
@@ -296,7 +308,12 @@ const About = () => {
             </div>
           </article>
 
-          <article className="service-card service-card--compact">
+          <article
+            className="service-card service-card--compact"
+            ref={(el) => {
+              cardRefs.current[1] = el;
+            }}
+          >
             <div className="service-card__head">
               <span className="service-card__icon">
                 <svg
@@ -324,7 +341,12 @@ const About = () => {
         </div>
 
         <div className="services-column services-column--alt">
-          <article className="service-card service-card--compact">
+          <article
+            className="service-card service-card--compact"
+            ref={(el) => {
+              cardRefs.current[2] = el;
+            }}
+          >
             <div className="service-card__head">
               <span className="service-card__icon">
                 <svg
@@ -360,7 +382,12 @@ const About = () => {
             </p>
           </article>
 
-          <article className="service-card service-card--media">
+          <article
+            className="service-card service-card--media"
+            ref={(el) => {
+              cardRefs.current[3] = el;
+            }}
+          >
             <div className="service-card__head">
               <span className="service-card__icon">
                 <svg
@@ -393,7 +420,12 @@ const About = () => {
               Launch polished mobile experiences with smooth performance,
               scalable architecture, and delightful UI across iOS and Android.
             </p>
-            <div className="service-card__media-slider">
+            <div
+              className="service-card__media-slider"
+              ref={(el) => {
+                mediaRefs.current[1] = el;
+              }}
+            >
               <div
                 className="service-card__media-track"
                 ref={mobileSliderRef}
@@ -401,21 +433,21 @@ const About = () => {
               >
                 <img
                   className="service-card__media-slide"
-                  src="assets/projects/elearning.jpg"
+                  src={assetUrl("projects/elearning.jpg")}
                   alt="Mobile app interface preview"
                   loading="lazy"
                   decoding="async"
                 />
                 <img
                   className="service-card__media-slide"
-                  src="assets/projects/image2.png"
+                  src={assetUrl("projects/image2.png")}
                   alt="Mobile app flow preview"
                   loading="lazy"
                   decoding="async"
                 />
                 <img
                   className="service-card__media-slide"
-                  src="assets/projects/elearning.jpg"
+                  src={assetUrl("projects/elearning.jpg")}
                   alt=""
                   aria-hidden="true"
                   loading="lazy"
@@ -423,7 +455,7 @@ const About = () => {
                 />
                 <img
                   className="service-card__media-slide"
-                  src="assets/projects/image2.png"
+                  src={assetUrl("projects/image2.png")}
                   alt=""
                   aria-hidden="true"
                   loading="lazy"
@@ -431,7 +463,7 @@ const About = () => {
                 />
                 <img
                   className="service-card__media-slide"
-                  src="assets/projects/elearning.jpg"
+                  src={assetUrl("projects/elearning.jpg")}
                   alt=""
                   aria-hidden="true"
                   loading="lazy"
@@ -439,7 +471,7 @@ const About = () => {
                 />
                 <img
                   className="service-card__media-slide"
-                  src="assets/projects/image2.png"
+                  src={assetUrl("projects/image2.png")}
                   alt=""
                   aria-hidden="true"
                   loading="lazy"
@@ -450,7 +482,7 @@ const About = () => {
           </article>
         </div>
       </div>
-      <TechMarquee />
+      <TechMarquee ref={marqueeRef} />
     </section>
   );
 };

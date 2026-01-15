@@ -1,8 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import { gsap, ScrollTrigger } from "../utils/gsap";
 
 const pricingOptions = {
   single: { starter: 999, growth: 2000 },

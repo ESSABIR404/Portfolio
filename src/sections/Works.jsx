@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import projects from "../data/projects";
 import { closeOverlayLoader } from "../loader";
+import { routeUrl } from "../utils/paths";
 
 const Works = () => {
   useEffect(() => {
@@ -19,7 +20,7 @@ const Works = () => {
             <a
               key={project.id}
               className="works-page__card"
-              href={`/works/${encodeURIComponent(project.id)}`}
+              href={routeUrl(`works/${encodeURIComponent(project.id)}`)}
             >
               <div className="works-page__media">
                 <img

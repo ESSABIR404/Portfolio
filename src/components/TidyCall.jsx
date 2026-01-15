@@ -1,8 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import { gsap, ScrollTrigger } from "../utils/gsap";
 
 const DEFAULT_TIDYCAL_URL =
   "https://tidycal.com/essabir02yassine/lets-chat-about-your-idea";
