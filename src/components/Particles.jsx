@@ -47,6 +47,9 @@ export const Particles = ({
   const isRunning = useRef(false);
   const isVisible = useRef(true);
   const prefersReduced = useRef(false);
+  const lastParticleFrameTime = useRef(performance.now());
+  const PARTICLE_TARGET_FPS = 30;
+  const PARTICLE_FRAME_TIME = 1000 / PARTICLE_TARGET_FPS;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -245,8 +248,16 @@ export const Particles = ({
     return remapped > 0 ? remapped : 0;
   };
 
-  const animate = () => {
+  const animate = (currentTime) => {
     if (!isRunning.current) return;
+    
+    // Throttle to PARTICLE_TARGET_FPS
+    if (currentTime - lastParticleFrameTime.current < PARTICLE_FRAME_TIME) {
+      rafID.current = window.requestAnimationFrame(animate);
+      return;
+    }
+    
+    lastParticleFrameTime.current = currentTime;
     clearContext();
     for (let i = circles.current.length - 1; i >= 0; i -= 1) {
       const circle = circles.current[i];
@@ -300,6 +311,7 @@ export const Particles = ({
   const startAnimation = () => {
     if (isRunning.current) return;
     isRunning.current = true;
+    lastParticleFrameTime.current = performance.now();
     rafID.current = window.requestAnimationFrame(animate);
   };
 

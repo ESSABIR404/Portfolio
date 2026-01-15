@@ -123,6 +123,8 @@ body {
   pointer-events: none;
   z-index: 10002;
   transform: translate(-50%, -50%);
+  contain: layout style paint;
+  will-change: transform, opacity;
 }
 .cursor-dot {
   width: 8px;
@@ -166,6 +168,7 @@ body {
   transform: translate(-50%, -50%) scale(0.9);
   backdrop-filter: blur(6px);
   will-change: transform, opacity;
+  contain: layout style paint;
 }
 .cursor-project__label {
   display: inline-block;
@@ -184,7 +187,20 @@ body {
 .parallax-layer__gradient {
   mix-blend-mode: screen;
   pointer-events: none;
+  contain: paint;
+  will-change: transform;
 }
+
+/* Containment for parallax background layers */
+.parallax-layer--sky,
+.parallax-layer--mountain3,
+.parallax-layer--planets,
+.parallax-layer--mountain2,
+.parallax-layer--mountain1 {
+  contain: paint;
+  will-change: transform;
+}
+
 .cursor-project__icon {
   width: 18px;
   height: 18px;

@@ -1,7 +1,8 @@
 import { FlipWords } from "./FlipWords";
 
+const HERO_WORDS = ["Secure", "Modern", "Scalable"];
+
 const HeroText = () => {
-  const words = ["Secure", "Modern", "Scalable"];
   return (
     <div className="z-10 mt-28 text-center md:mt-32 md:text-left px-32 lg:px-48">
       {/* Desktop View */}
@@ -15,7 +16,7 @@ const HeroText = () => {
           </p>
           <div className="js-hero-item">
             <FlipWords
-              words={words}
+              words={HERO_WORDS}
               className="hero-word font-black text-white text-8xl lg:text-9xl"
             />
           </div>
@@ -41,7 +42,7 @@ const HeroText = () => {
           </p>
           <div className="js-hero-item">
             <FlipWords
-              words={words}
+              words={HERO_WORDS}
               className="hero-word font-bold text-white text-8xl"
             />
           </div>

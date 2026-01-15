@@ -40,6 +40,9 @@ const Navbar = () => {
             />
           </a>
           <button
+            type="button"
+            aria-expanded={isOpen}
+            aria-controls="navbar-panel"
             onClick={() => setIsOpen(!isOpen)}
             className="flex cursor-pointer text-neutral-300 hover:text-white focus:outline-none sm:hidden"
           >
@@ -59,6 +62,8 @@ const Navbar = () => {
         </div>
       </div>
       <div
+        id="navbar-panel"
+        role="menu"
         className={`block overflow-hidden text-center sm:hidden nav-panel${
           isOpen ? " nav-panel--open" : ""
         }`}

@@ -4,11 +4,12 @@ import Hero from "./sections/Hero";
 import About from "./sections/About";
 import LatestWork from "./sections/LatestWork";
 import LazyMount from "./components/LazyMount";
-import Footer from './sections/Footer';
+import Footer from "./sections/Footer";
 import { initOverlayLoader } from "./loader";
 import { initCursor } from "./cursor";
 import { normalizePathname } from "./utils/paths";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { initPerformanceMonitoring } from "./utils/performance";
 
 const WorkDetail = lazy(() => import("./sections/WorkDetail"));
 const Works = lazy(() => import("./sections/Works"));
@@ -43,6 +44,15 @@ const App = () => {
     return () => {
       if (typeof cleanupCursor === "function") {
         cleanupCursor();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const cleanupPerf = initPerformanceMonitoring();
+    return () => {
+      if (typeof cleanupPerf === "function") {
+        cleanupPerf();
       }
     };
   }, []);
@@ -98,7 +108,15 @@ const App = () => {
 
   const pathname = normalizePathname(location.pathname);
   const workMatch = pathname.match(/^\/works\/([^/]+)\/?$/);
-  const workId = workMatch ? decodeURIComponent(workMatch[1]) : null;
+  let workId = null;
+  if (workMatch) {
+    try {
+      workId = decodeURIComponent(workMatch[1]);
+    } catch (error) {
+      workId = null;
+      console.warn("Invalid work identifier", workMatch[1], error);
+    }
+  }
   const worksIndex = /^\/works\/?$/.test(pathname);
 
   useEffect(() => {

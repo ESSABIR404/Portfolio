@@ -567,15 +567,17 @@ const WorkDetail = ({ id }) => {
         </div>
 
         <div className="work-detail__media">
-          <div className="work-detail__hero-media" ref={heroMediaRef}>
-            <img
-              src={project.image}
-              srcSet={heroSrcSet || undefined}
-              sizes={heroSrcSet ? heroSizes : undefined}
-              alt={`${project.title} hero`}
-              decoding="async"
-            />
-          </div>
+            <div className="work-detail__hero-media" ref={heroMediaRef}>
+              <img
+                src={project.image}
+                srcSet={heroSrcSet || undefined}
+                sizes={heroSrcSet ? heroSizes : undefined}
+                alt={`${project.title} hero`}
+                width={1600}
+                height={900}
+                decoding="async"
+              />
+            </div>
           <div className="work-detail__grid">
             {project.gallery?.map((src, index) => (
               <div
@@ -590,6 +592,8 @@ const WorkDetail = ({ id }) => {
                   srcSet={appendFallbackSrcSet(buildSrcSet(src), src) || undefined}
                   sizes="(max-width: 900px) 44vw, 22vw"
                   alt={`${project.title} detail ${index + 1}`}
+                  width={1200}
+                  height={800}
                   loading="lazy"
                   decoding="async"
                 />
@@ -832,6 +836,8 @@ const WorkDetail = ({ id }) => {
                       }
                       sizes="(max-width: 900px) 80vw, 26vw"
                       alt={`${item.title} preview`}
+                      width={1400}
+                      height={900}
                       loading="lazy"
                       decoding="async"
                     />

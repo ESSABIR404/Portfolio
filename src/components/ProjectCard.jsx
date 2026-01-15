@@ -27,16 +27,18 @@ const ProjectCard = forwardRef(
       </div>
 
       <div className="latest-work__right">
-        <div className="latest-work__device" ref={deviceRef}>
-          <img
-            src={image}
-            srcSet={srcSet || undefined}
-            sizes={srcSet ? sizes : undefined}
-            alt={`${title} preview`}
-            loading="lazy"
-            decoding="async"
-          />
-        </div>
+          <div className="latest-work__device" ref={deviceRef}>
+            <img
+              src={image}
+              srcSet={srcSet || undefined}
+              sizes={srcSet ? sizes : undefined}
+              alt={`${title} preview`}
+              width={1400}
+              height={900}
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
       </div>
     </a>
   );
